@@ -41,7 +41,7 @@ architecture rtl of modular_multiplication is
     signal internal_addition : unsigned(N - 1 downto 0);
     signal internal_modulo   : unsigned(N - 1 downto 0);
     signal internal_result   : unsigned(N - 1 downto 0);
-    signal counter           : natural range 0 to N - 1;
+    signal counter           : unsigned(7 downto 0);
 begin
     result <= internal_result;
 
@@ -50,6 +50,7 @@ begin
     -- calculation has iterated through the whole number, and the result is valid.
     ----------------------------------------------------------------------------------
     check_if_valid : process(clk) is
+        begin
         if counter = 0 then
             valid_out <= '1';
         else
@@ -63,7 +64,7 @@ begin
     count_down_iterations : process(clk, reset_n) is
     begin
         if reset_n = '1' then
-            counter <= N - 1;
+            counter <= (others => '1');
         elsif rising_edge(clk) then
             counter <= counter - 1;
         end if;
@@ -79,7 +80,7 @@ begin
             internal_result   <= (others => '0');
             internal_addition <= (others => '0');
         elsif rising_edge(clk) then
-            if factor_a(counter) = '1' then
+            if factor_a(to_integer(counter)) = '1' then
                 temp_factor_b := factor_b;
             else 
                 temp_factor_b := (others => '0');

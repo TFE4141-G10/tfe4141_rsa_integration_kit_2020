@@ -41,15 +41,15 @@ end exponentiation;
 
 
 architecture expBehave of exponentiation is
-component modularmultiplication is
+component modular_multiplication is
         Port (
             clk: in std_logic;
             reset_n: in std_logic;
-            factor_a: in std_logic_vector(255 downto 0);
-            factor_b: in std_logic_vector(255 downto 0);
-            modulus: in std_logic_vector(255 downto 0);
+            factor_a: in unsigned(255 downto 0);
+            factor_b: in unsigned(255 downto 0);
+            modulus: in unsigned(255 downto 0);
             valid_out: out std_logic;
-            result: out std_logic_vector(255 downto 0)
+            result: out unsigned(255 downto 0)
             );
 	end component;
 	
@@ -90,7 +90,7 @@ begin
     
     --------------------BLAKLEY CORE-------------------------------------
     
-    M0: modularmultiplication port map (factor_a => mux_factor_a, factor_b => mux_factor_b, result => mux_in, clk => clk, reset_n => reset_n, modulus => modulus, blakley_done => s_blakley_done);
+    M0: modular_multiplication port map (factor_a => unsigned(mux_factor_a), factor_b => unsigned(mux_factor_b), std_logic_vector(result) => mux_in, clk => clk, reset_n => reset_n, modulus => unsigned(modulus), valid_out => s_blakley_done);
     
     --------------------SIGNAL MAPPING------------------------------------------------------
     blakley_done <= s_blakley_done;
