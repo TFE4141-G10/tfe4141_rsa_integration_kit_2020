@@ -50,6 +50,7 @@ begin
     -- calculation has iterated through the whole number, and the result is valid.
     ----------------------------------------------------------------------------------
     check_if_valid : process(clk) is
+    begin
         if counter = 0 then
             valid_out <= '1';
         else
@@ -62,7 +63,7 @@ begin
     ----------------------------------------------------------------------------------
     count_down_iterations : process(clk, reset_n) is
     begin
-        if reset_n = '1' then
+        if reset_n = '0' then
             counter <= N - 1;
         elsif rising_edge(clk) then
             counter <= counter - 1;
@@ -75,7 +76,7 @@ begin
     multiplication : process(clk, reset_n) is
         variable temp_factor_b: unsigned(N - 1 downto 0);
     begin
-        if reset_n = '1' then
+        if reset_n = '0' then
             internal_result   <= (others => '0');
             internal_addition <= (others => '0');
         elsif rising_edge(clk) then
