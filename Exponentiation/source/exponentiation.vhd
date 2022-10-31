@@ -134,6 +134,7 @@ begin
             
             elsif message_recived = '0' then
             ready_in <= '1';
+            clear <= '0';
             
             elsif clear = '0' then 
                 clear <= '1'; 
