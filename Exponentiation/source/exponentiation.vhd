@@ -36,7 +36,8 @@ entity exponentiation is
 		a_blakley  : out std_logic_vector(255 downto 0);
 		b_blakley  : out std_logic_vector(255 downto 0);
 		n_blakley  : out std_logic_vector(255 downto 0);
-		blakley_done: out std_logic
+		blakley_done: out std_logic;
+		clear_blakley: out std_logic
 		
 	);
 end exponentiation;
@@ -107,6 +108,7 @@ begin
     blakley_done <= s_blakley_done;
     result <= internal_r;
     count <= counter; 
+    clear_blakley <= clear;
     
     
     --------------TEST SIGNALS BLAKLEY-----------
@@ -120,7 +122,7 @@ begin
     process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            internal_r <= (others => '0');
+            --internal_r <= (others => '0');
             --counter <= (others => '0');
             --doubleclac_counter <= '0';
             s_message <= (others => '0');
@@ -130,14 +132,14 @@ begin
             s_message <= message;
             ready_in <= '0';
             message_recived <= '1';
-            clear <= '1';
+           -- clear <= '1';
             
             elsif message_recived = '0' then
             ready_in <= '1';
-            clear <= '0';
+            --clear <= '0';
             
-            elsif clear = '0' then 
-                clear <= '1'; 
+           -- elsif clear = '0' then 
+             --   clear <= '1'; 
             
             --elsif counter = 255 then
             --ready_in <= '0';
@@ -165,19 +167,21 @@ begin
     --end if;
     --end process;
    ------------------------------------PROCESS BLAKLEY DONE------------------------------------------------------------------
-   process(s_blakley_done) is
+   process(s_blakley_done, clk) is
    begin
         if falling_edge(s_blakley_done) then
             clear <= '0';
             internal_r <= mux_in;
             if doublecalc = '1' and doubleclac_counter = '0' then
                 doubleclac_counter <= '1';
-            elsif counter > 0 then
+            else
                 counter <= counter - 1;
                 doubleclac_counter <= '0';
-            elsif counter = 0 then
+            --elsif counter = 0 then
                 -- Wait and to do something
             end if;
+        else 
+            clear <= '1';
         end if;
         
         
