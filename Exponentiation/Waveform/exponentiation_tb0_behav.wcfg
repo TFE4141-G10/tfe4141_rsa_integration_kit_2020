@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="exponentiation_tb0_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="exponentiation_tb0" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="105fs"></ZoomEndTime>
+      <Cursor1Time time="25fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="340"></NameColumnWidth>
+      <ValueColumnWidth column_width="155"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="17" />
+   <wvobject fp_name="/exponentiation_tb0/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/reset_n" type="logic">
+      <obj_property name="ElementShortName">reset_n</obj_property>
+      <obj_property name="ObjectShortName">reset_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/count" type="array">
+      <obj_property name="ElementShortName">count[7:0]</obj_property>
+      <obj_property name="ObjectShortName">count[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/blakley_done" type="logic">
+      <obj_property name="ElementShortName">blakley_done</obj_property>
+      <obj_property name="ObjectShortName">blakley_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/valid_out" type="logic">
+      <obj_property name="ElementShortName">valid_out</obj_property>
+      <obj_property name="ObjectShortName">valid_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/key" type="array">
+      <obj_property name="ElementShortName">key[255:0]</obj_property>
+      <obj_property name="ObjectShortName">key[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/message" type="array">
+      <obj_property name="ElementShortName">message[255:0]</obj_property>
+      <obj_property name="ObjectShortName">message[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/modulus" type="array">
+      <obj_property name="ElementShortName">modulus[255:0]</obj_property>
+      <obj_property name="ObjectShortName">modulus[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/result" type="array">
+      <obj_property name="ElementShortName">result[255:0]</obj_property>
+      <obj_property name="ObjectShortName">result[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/valid_in" type="logic">
+      <obj_property name="ElementShortName">valid_in</obj_property>
+      <obj_property name="ObjectShortName">valid_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/a_blakley" type="array">
+      <obj_property name="ElementShortName">a_blakley[255:0]</obj_property>
+      <obj_property name="ObjectShortName">a_blakley[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/b_blakley" type="array">
+      <obj_property name="ElementShortName">b_blakley[255:0]</obj_property>
+      <obj_property name="ObjectShortName">b_blakley[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/n_blakley" type="array">
+      <obj_property name="ElementShortName">n_blakley[255:0]</obj_property>
+      <obj_property name="ObjectShortName">n_blakley[255:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/T" type="other">
+      <obj_property name="ElementShortName">T</obj_property>
+      <obj_property name="ObjectShortName">T</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/A_C" type="other">
+      <obj_property name="ElementShortName">A_C</obj_property>
+      <obj_property name="ObjectShortName">A_C</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/B_C" type="other">
+      <obj_property name="ElementShortName">B_C</obj_property>
+      <obj_property name="ObjectShortName">B_C</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb0/N_C" type="other">
+      <obj_property name="ElementShortName">N_C</obj_property>
+      <obj_property name="ObjectShortName">N_C</obj_property>
+   </wvobject>
+</wave_config>

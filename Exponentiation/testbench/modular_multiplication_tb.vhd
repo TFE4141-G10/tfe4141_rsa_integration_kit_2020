@@ -37,7 +37,17 @@ architecture behavior of modular_multiplication_tb is
     signal   result    : unsigned(N - 1 downto 0);
     signal   counter   : natural range 0 to N - 1;
 begin
-    DUT : entity work.blakley 
+    counter_process : process(clk, reset_n) is
+    begin
+        if reset_n = '0' then
+            counter <= N - 1;
+        elsif rising_edge(clk) then
+            counter <= counter - 1;
+        end if;
+    end process;
+
+
+    DUT : entity work.modular_multiplication
         generic map (
             N         => N
         )
@@ -55,19 +65,16 @@ begin
 
     process
     begin
+        -- counter <= N - 1;
         reset_n  <= '1';
-        factor_a <= to_unsigned(55, N);
+        factor_a <= to_unsigned(56, N);
         factor_b <= to_unsigned(83, N);
-        modulus  <= to_unsigned(1000, N);
+        modulus  <= to_unsigned(55, N);
+        wait for 5122 ps;
+            -- counter <= N - 1;
+        factor_a <= to_unsigned(63, N);
+        factor_b <= to_unsigned(83, N);
+        modulus  <= to_unsigned(55, N);
         wait;
-    end process;
-
-    process(clk, reset_n) is
-    begin
-        if reset_n = '0' then
-            counter <= N - 1;
-        elsif rising_edge(clk) then
-            counter <= counter - 1;
-        end if;
     end process;
 end architecture;
