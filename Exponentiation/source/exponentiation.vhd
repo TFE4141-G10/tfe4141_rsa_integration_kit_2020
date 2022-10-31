@@ -28,8 +28,10 @@ entity exponentiation is
 		--utility
 		clk 		: in STD_LOGIC;
 		reset_n 	: in STD_LOGIC;
+		
 		--debugging purposes binary
 		count       : out unsigned(7 DOWNTO 0);
+		
 		--debugging purposes blakley
 		a_blakley  : out std_logic_vector(255 downto 0);
 		b_blakley  : out std_logic_vector(255 downto 0);
@@ -59,10 +61,12 @@ component modular_multiplication is
     signal mux_start_condition: std_logic_vector(255 downto 0) := (others  => '0');
     signal mux_in: std_logic_vector(255 downto 0) := (others => '0');
     signal s_blakley_done: std_logic;
-    signal doublecalc: bit:='1';
-    signal doubleclac_counter: bit:= '0';
+    signal doublecalc: std_logic := '1';
+    signal doubleclac_counter: std_logic := '0';
     signal counter: unsigned(7 downto 0) := (others => '1'); 
-    
+    signal s_message: std_logic_vector(255 downto 0);
+    signal message_recived: std_logic := '0';
+    signal clear: std_logic := '0';
     
 
 
@@ -72,25 +76,32 @@ begin
     internal_r;
 
     
-    mux_factor_b <= message when doubleclac_counter = '1' else
+    mux_factor_b <= s_message when doubleclac_counter = '1' else
     mux_factor_a;
     
     
-    mux_start_condition <= message when key(255) = '1' else
+    mux_start_condition <= s_message when key(255) = '1' else
     std_logic_vector(to_unsigned(1, 256));
     
     doublecalc <= '1' when key(to_integer(counter)) = '1' else
     '0';
-    
+    ------------------Flow controll-----------------------
     valid_out <= '1' when counter = 0 else
     '0';
+    
+    --ready_in <= '1' when counter = 255 else
+    --'0';
+    
+    
+    
+    
     
     
     
     
     --------------------BLAKLEY CORE-------------------------------------
     
-    M0: modular_multiplication port map (factor_a => unsigned(mux_factor_a), factor_b => unsigned(mux_factor_b), std_logic_vector(result) => mux_in, clk => clk, reset_n => reset_n, modulus => unsigned(modulus), valid_out => s_blakley_done);
+    M0: modular_multiplication port map (factor_a => unsigned(mux_factor_a), factor_b => unsigned(mux_factor_b), std_logic_vector(result) => mux_in, clk => clk, reset_n => clear, modulus => unsigned(modulus), valid_out => s_blakley_done);
     
     --------------------SIGNAL MAPPING------------------------------------------------------
     blakley_done <= s_blakley_done;
@@ -108,9 +119,28 @@ begin
     ----------------------------------PROCESS CLK/RST-----------------------------------------NOT IN USE
     process(clk, reset_n) is
     begin
-        if reset_n = '1' then
-            --internal_r <= (others => '0');
+        if reset_n = '0' then
+            internal_r <= (others => '0');
             --counter <= (others => '0');
+            --doubleclac_counter <= '0';
+            s_message <= (others => '0');
+            
+         elsif rising_edge(clk) then
+            if ready_in = '1' and valid_in = '1' then
+            s_message <= message;
+            ready_in <= '0';
+            message_recived <= '1';
+            clear <= '1';
+            
+            elsif message_recived = '0' then
+            ready_in <= '1';
+            
+            elsif clear = '0' then 
+                clear <= '1'; 
+            
+            --elsif counter = 255 then
+            --ready_in <= '0';
+         end if; 
             --mux1_mode <= '0';
             --mux2_mode <= '0';
         
@@ -134,15 +164,18 @@ begin
     --end if;
     --end process;
    ------------------------------------PROCESS BLAKLEY DONE------------------------------------------------------------------
-   process(s_blakley_done, clk) is
+   process(s_blakley_done) is
    begin
-        if s_blakley_done = '1' and falling_edge(clk) then
+        if falling_edge(s_blakley_done) then
+            clear <= '0';
             internal_r <= mux_in;
             if doublecalc = '1' and doubleclac_counter = '0' then
                 doubleclac_counter <= '1';
-            else
+            elsif counter > 0 then
                 counter <= counter - 1;
                 doubleclac_counter <= '0';
+            elsif counter = 0 then
+                -- Wait and to do something
             end if;
         end if;
         

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="exponentiation_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="exponentiation_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="4508621fs"></ZoomEndTime>
+      <Cursor1Time time="1000000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="340"></NameColumnWidth>
+      <ValueColumnWidth column_width="150"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/exponentiation_tb/valid_in" type="logic">
+      <obj_property name="ElementShortName">valid_in</obj_property>
+      <obj_property name="ObjectShortName">valid_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/message" type="array">
+      <obj_property name="ElementShortName">message[255:0]</obj_property>
+      <obj_property name="ObjectShortName">message[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/key" type="array">
+      <obj_property name="ElementShortName">key[255:0]</obj_property>
+      <obj_property name="ObjectShortName">key[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/ready_in" type="logic">
+      <obj_property name="ElementShortName">ready_in</obj_property>
+      <obj_property name="ObjectShortName">ready_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/ready_out" type="logic">
+      <obj_property name="ElementShortName">ready_out</obj_property>
+      <obj_property name="ObjectShortName">ready_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/valid_out" type="logic">
+      <obj_property name="ElementShortName">valid_out</obj_property>
+      <obj_property name="ObjectShortName">valid_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/result" type="array">
+      <obj_property name="ElementShortName">result[255:0]</obj_property>
+      <obj_property name="ObjectShortName">result[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/modulus" type="array">
+      <obj_property name="ElementShortName">modulus[255:0]</obj_property>
+      <obj_property name="ObjectShortName">modulus[255:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/restart" type="logic">
+      <obj_property name="ElementShortName">restart</obj_property>
+      <obj_property name="ObjectShortName">restart</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/reset_n" type="logic">
+      <obj_property name="ElementShortName">reset_n</obj_property>
+      <obj_property name="ObjectShortName">reset_n</obj_property>
+   </wvobject>
+   <wvobject fp_name="/exponentiation_tb/C_block_size" type="other">
+      <obj_property name="ElementShortName">C_block_size</obj_property>
+      <obj_property name="ObjectShortName">C_block_size</obj_property>
+   </wvobject>
+</wave_config>

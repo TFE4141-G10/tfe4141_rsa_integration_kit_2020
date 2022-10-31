@@ -47,16 +47,24 @@ signal blakley_done, valid_out: std_logic;
 signal key : std_logic_vector(255 downto 0);
 signal message, modulus : std_logic_vector(255 downto 0);
 signal result: std_logic_vector(255 downto 0);
+signal ready_out, ready_in: std_logic; 
 signal valid_in: std_logic:='0';
 signal a_blakley, b_blakley, n_blakley: std_logic_vector(255 downto 0); 
 
 
 begin
-    UUT : entity work.exponentiation port map (valid_in => valid_in, ready_out => valid_out, a_blakley => a_blakley, b_blakley => b_blakley, n_blakley => n_blakley, message => message, key => key, modulus => modulus, result => result, valid_out => valid_out, clk => clk, reset_n => reset_n, blakley_done => blakley_done, count => count);
-reset_n <= '0';
+    UUT : entity work.exponentiation port map (ready_in => ready_in, valid_in => valid_in, ready_out => ready_out, a_blakley => a_blakley, b_blakley => b_blakley, n_blakley => n_blakley, message => message, key => key, modulus => modulus, result => result, valid_out => valid_out, clk => clk, reset_n => reset_n, blakley_done => blakley_done, count => count);
+reset_n <= '0', '1' after 5*T;
 modulus <= std_logic_vector(to_unsigned(N_C, 256));
 key <= std_logic_vector(to_unsigned(A_C, 256));
-message <= std_logic_vector(to_unsigned(B_C, 256));
+
+message <= (others => '0'), std_logic_vector(to_unsigned(B_C, 256)) after 5*T,(others => '0') after 10*T ;
+valid_in <= '1' after 6*T, '0' after 10*T;
+
+--message <= std_logic_vector(to_unsigned(B_C, 256)) when ready_in = '1' else 
+--(others => '0');
+
+
 --valid_out <= '1', '0' after 512*T/2;
 
  process 
