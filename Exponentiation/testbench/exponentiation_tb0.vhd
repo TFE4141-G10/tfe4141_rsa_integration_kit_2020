@@ -36,7 +36,7 @@ entity exponentiation_tb0 is
 --  Port ( );
 end exponentiation_tb0;
 
-architecture Behavioral of exponentiation_tb0 is
+architecture behavior of exponentiation_tb0 is
 constant T : time := 20 ps; 
 constant A_C : integer := 51; 
 constant B_C : integer := 3; 
@@ -75,4 +75,4 @@ valid_in <= '1' after 6*T, '0' after 10*T;
         clk <= '1';
         wait for T/2;
     end process;
-end Behavioral;
+end architecture;

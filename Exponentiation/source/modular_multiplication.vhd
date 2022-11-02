@@ -44,32 +44,27 @@ architecture rtl of modular_multiplication is
     signal internal_factor_b : unsigned(N - 1 downto 0);
     signal counter           : unsigned(7 downto 0);
 begin
-    result            <= internal_result;
+    ----------------------------------------------------------------------------------
+    -- Internal calculations for the modular multiplication
+    ----------------------------------------------------------------------------------
+    internal_factor_b <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
     internal_addition <= shift_left(internal_result, 1) + internal_factor_b;    
-    internal_factor_b <= factor_b when factor_a(to_integer(counter)) = '1' else
-                         (others => '0');
+    result            <= internal_result;
+    
+    ----------------------------------------------------------------------------------
+    -- When the counter is equal to 0, it means that the calculation has iterated 
+    -- through the whole number, and the result is valid on falling edge of valid_out.
+    ----------------------------------------------------------------------------------
     valid_out         <= '1' when counter = 0 else 
                          '0';
-    ----------------------------------------------------------------------------------
-    -- check_if_valid: When the counter is equal to 0, it means that the 
-    -- calculation has iterated through the whole number, and the result is valid.
-    ----------------------------------------------------------------------------------
-    --check_if_valid : process(clk) is
-    --begin
-    --    if counter = 0 then
-    --        valid_out <= '1';
-    --    else
-    --        valid_out <= '0';
-    --    end if;
-    --end process;
 
     ----------------------------------------------------------------------------------
-    -- count_down_iterations: This process increments the counter by 1 every clock cycle.
+    -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------
-    count_down_iterations : process(clk, reset_n) is
+    count_down : process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            counter <= to_unsigned(255, 8);
+            counter <= (others => '1');
         elsif rising_edge(clk) then
             counter <= counter - 1;
         end if;
