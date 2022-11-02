@@ -110,7 +110,7 @@ begin
                     internal_message   <= message;
                     next_message_state <= message_not_received;
                 else
-                    
+                    internal_message   <= internal_message;
                     next_message_state <= message_received;
                 end if;     
         end case;
