@@ -43,18 +43,28 @@ constant B_C : integer := 3;
 constant N_C: integer := 55; 
 signal clk, reset_n : std_logic;
 signal count: unsigned(7 downto 0);
-signal blakley_done, valid_out: std_logic;
+signal valid_out: std_logic;
 signal key : std_logic_vector(255 downto 0);
 signal message, modulus : std_logic_vector(255 downto 0);
 signal result: std_logic_vector(255 downto 0);
 signal ready_out, ready_in: std_logic; 
 signal valid_in: std_logic:='0';
-signal clear_blakley: std_logic;
-signal a_blakley, b_blakley, n_blakley: std_logic_vector(255 downto 0); 
 
 
 begin
-    UUT : entity work.exponentiation port map (clear_blakley => clear_blakley, ready_in => ready_in, valid_in => valid_in, ready_out => ready_out, a_blakley => a_blakley, b_blakley => b_blakley, n_blakley => n_blakley, message => message, key => key, modulus => modulus, result => result, valid_out => valid_out, clk => clk, reset_n => reset_n, blakley_done => blakley_done, count => count);
+    UUT : entity work.exponentiation port map ( 
+        ready_in => ready_in, 
+        valid_in => valid_in, 
+        ready_out => ready_out, 
+        message => message, 
+        key => key, 
+        modulus => modulus, 
+        result => result, 
+        valid_out => valid_out, 
+        clk => clk, 
+        reset_n => reset_n,
+        count => count
+    );
 reset_n <= '0', '1' after 5*T;
 modulus <= std_logic_vector(to_unsigned(N_C, 256));
 key <= std_logic_vector(to_unsigned(A_C, 256));

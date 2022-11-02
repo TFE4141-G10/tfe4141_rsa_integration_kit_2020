@@ -110,7 +110,7 @@ begin
                     internal_message   <= message;
                     next_message_state <= message_not_received;
                 else
-                    internal_message   <= internal_message;
+                    -- internal_message   <= internal_message;
                     next_message_state <= message_received;
                 end if;     
         end case;
@@ -134,10 +134,11 @@ begin
                 if key(to_integer(counter)) = '1' then
                     next_calculation_state <= double_multiplication;
                 else
-                    next_calculation_state <= single_multiplication;
                     counter <= counter - 1;
+                    next_calculation_state <= single_multiplication;
                 end if; 
             when double_multiplication =>
+                counter <= counter - 1;
                 next_calculation_state <= single_multiplication;
         end case;
     end process;
