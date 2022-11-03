@@ -41,7 +41,8 @@ constant T : time := 20 ps;
 constant A_C : integer := 51; 
 constant B_C : integer := 3; 
 constant N_C: integer := 55; 
-signal clk, reset_n : std_logic;
+signal clk : std_logic := '0'; 
+signal reset_n : std_logic;
 signal count: unsigned(7 downto 0);
 signal valid_out: std_logic;
 signal key : std_logic_vector(255 downto 0);
@@ -65,24 +66,24 @@ begin
         reset_n => reset_n,
         count => count
     );
-reset_n <= '0', '1' after 5*T;
-modulus <= std_logic_vector(to_unsigned(N_C, 256));
-key <= std_logic_vector(to_unsigned(A_C, 256));
-
-message <= (others => '0'), std_logic_vector(to_unsigned(B_C, 256)) after 5*T,(others => '0') after 10*T ;
-valid_in <= '1' after 6*T, '0' after 10*T;
-
---message <= std_logic_vector(to_unsigned(B_C, 256)) when ready_in = '1' else 
---(others => '0');
-
-
---valid_out <= '1', '0' after 512*T/2;
-
- process 
+    clk <= not clk after T/2;
+    
+    stimuli : process
     begin
-        clk <= '0';
-        wait for T/2;
-        clk <= '1';
-        wait for T/2;
+        message <= (others => '0'), std_logic_vector(to_unsigned(B_C, 256)); -- after 5*T,(others => '0') after 10*T ;
+        key <= std_logic_vector(to_unsigned(A_C, 256));
+        modulus <= std_logic_vector(to_unsigned(N_C, 256));
+        reset_n <= '0';
+
+        wait for 5*T;
+        reset_n <= '1';
+
+        wait for 1*T;
+        valid_in <= '1';
+
+        wait for 4*T;
+        valid_in <= '0';
+
+        wait;
     end process;
 end architecture;

@@ -36,10 +36,10 @@ end entity;
 
 
 architecture rtl of exponentiation is
-    type multiplication_state_type is (single_multiplication, double_multiplication);
+    --type multiplication_state_type is (single_multiplication, double_multiplication);
     type message_state_type     is (message_received, message_not_received);
-    signal calculation_state      : multiplication_state_type := double_multiplication;
-    signal next_calculation_state : multiplication_state_type;
+    --signal calculation_state      : multiplication_state_type := double_multiplication;
+    --signal next_calculation_state : multiplication_state_type;
     signal message_state          : message_state_type     := message_not_received;
     signal next_message_state     : message_state_type;
     signal internal_result        : std_logic_vector(N - 1 downto 0) := (others => '0');
@@ -48,23 +48,24 @@ architecture rtl of exponentiation is
     signal start_condition        : std_logic_vector(N - 1 downto 0) := (others => '0');
     signal mux_in                 : std_logic_vector(N - 1 downto 0) := (others => '0');
     signal multiplication_done    : std_logic;
-    --signal doublecalc             : std_logic := '1';
-    --signal doubleclac_counter     : std_logic := '0';
+    signal doublecalc             : std_logic := '1';
+    signal doubleclac_counter     : std_logic := '0';
     signal counter                : unsigned(7 downto 0) := (others => '1'); 
     signal internal_message       : std_logic_vector(255 downto 0);
     --signal message_received       : std_logic := '0';
     signal clear_multiplication   : std_logic := '0';
+    --signal count_down_now         : std_logic := '0';
 
 
 begin
     -------------MUXES--------------------------------------
     factor_a        <= start_condition when counter = N - 1 else
                        internal_result;
-    factor_b        <= internal_message when calculation_state = double_multiplication else
+    factor_b        <= internal_message when doubleclac_counter = '1' else
                        factor_a;
     start_condition <= internal_message when key(N - 1) = '1' else
                        std_logic_vector(to_unsigned(1, 256)); 
-    -- doublecalc <= '1' when key(to_integer(counter)) = '1' else '0';
+    doublecalc <= '1' when key(to_integer(counter)) = '1' else '0';
     ------------------Flow controll-----------------------
     valid_out <= '1' when counter = 0 else '0';
     
@@ -103,6 +104,7 @@ begin
         case message_state is
             when message_not_received =>
                 ready_in           <= '1';
+                --internal_message   <= (others => '0');
                 next_message_state <= message_received;
             when message_received =>
                 if ready_in = '1' and valid_in = '1' then
@@ -110,38 +112,71 @@ begin
                     internal_message   <= message;
                     next_message_state <= message_not_received;
                 else
-                    -- internal_message   <= internal_message;
+                    ready_in           <= '1';
                     next_message_state <= message_received;
                 end if;     
         end case;
     end process;
 
 
-    change_calculation_state : process(multiplication_done) is
+    --change_calculation_state : process(multiplication_done) is
+    --begin
+    --    clear_multiplication <= '1';
+    --    if falling_edge(multiplication_done) then
+    --        clear_multiplication <= '0';
+    --        internal_result      <= mux_in;
+    --        calculation_state    <= next_calculation_state;
+    --    end if;
+    --end process;
+
+    process(multiplication_done, clk) is
     begin
         clear_multiplication <= '1';
         if falling_edge(multiplication_done) then
             clear_multiplication <= '0';
-            internal_result      <= mux_in;
-            calculation_state    <= next_calculation_state;
+            internal_result <= mux_in;
+            if doublecalc = '1' and doubleclac_counter = '0' then
+                doubleclac_counter <= '1';
+            else
+                counter <= counter - 1;
+                doubleclac_counter <= '0';
+            end if;
         end if;
     end process;
 
-    calculation_state_machine : process(calculation_state, counter) is
-    begin
-        case calculation_state is
-            when single_multiplication =>
-                if key(to_integer(counter)) = '1' then
-                    next_calculation_state <= double_multiplication;
-                else
-                    counter <= counter - 1;
-                    next_calculation_state <= single_multiplication;
-                end if; 
-            when double_multiplication =>
-                counter <= counter - 1;
-                next_calculation_state <= single_multiplication;
-        end case;
-    end process;
+    --calculation_state_machine : process(multiplication_done, calculation_state, counter) is
+    --begin
+    --    case calculation_state is
+    --        when single_multiplication =>
+    --            if key(to_integer(counter)) = '1' then
+    --                next_calculation_state <= double_multiplication;
+    --            else
+    --                --counter <= counter - 1;
+    --                next_calculation_state <= single_multiplication;
+    --            end if; 
+    --        when double_multiplication =>
+    --            --counter <= counter - 1;
+    --            next_calculation_state <= single_multiplication;
+    --    end case;
+    --end process;
+--
+    --count_down : process(multiplication_done, count_down_now) is
+    --begin
+    --    if falling_edge(multiplication_done) then
+    --        if count_down_now = '1' then
+    --            counter <= counter - 1;
+    --        end if;
+    --    end if;
+    --end process;
+
+    --count_down : process(multiplication_done, calculation_state, counter) is
+    --begin
+    --    if falling_edge(multiplication_done) then
+    --        if calculation_state = single_multiplication then
+    --            counter <= counter - 1;
+    --        end if;
+    --    end if;
+    --end process;
 end architecture;
 
 
