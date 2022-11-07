@@ -106,6 +106,14 @@ architecture rtl of rsa_accelerator is
 	signal key_n        : std_logic_vector(C_BLOCK_SIZE-1 downto 0);
 	signal rsa_status   : std_logic_vector(31 downto 0);
 
+	-----------------------------------------------------------------------------
+	-- Signals for multicore design
+	-----------------------------------------------------------------------------
+	signal msgin_valid_vector: std_logic_vector(5 downto 0) := (0 => '1', others => '0');
+    signal msgout_ready_vector: std_logic_vector(5 downto 0) := (0 => '1', others => '0');
+    type msgout_data_array is array(0 to 6) of std_logic_vector(255 downto 0); 
+    signal msgout_signal_array : msgout_data_array;
+    
 begin
 
 -- Instantiation of Axi Bus Interface S00_AXI
@@ -191,6 +199,10 @@ u_rsa_msgout : entity work.rsa_msgout
 		msgout_last            => msgout_last
 	);
 
+
+
+generate_cores : for i in 0 to 5 generate
+begin
 u_rsa_core : entity work.rsa_core
 	generic map (
 		C_BLOCK_SIZE => C_BLOCK_SIZE
@@ -205,7 +217,7 @@ u_rsa_core : entity work.rsa_core
 		-----------------------------------------------------------------------------
 		-- Slave msgin interface
 		-----------------------------------------------------------------------------
-		msgin_valid            => msgin_valid,
+		msgin_valid            => msgin_valid_vector(i),
 		msgin_ready            => msgin_ready,
 		msgin_data             => msgin_data,
 		msgin_last             => msgin_last,
@@ -214,8 +226,8 @@ u_rsa_core : entity work.rsa_core
 		-- Master msgout interface
 		-----------------------------------------------------------------------------
 		msgout_valid           => msgout_valid,
-		msgout_ready           => msgout_ready,
-		msgout_data            => msgout_data,
+		msgout_ready           => msgout_ready_vector(i),
+		msgout_data            => msgout_signal_array(i),
 		msgout_last            => msgout_last,
 
 		-----------------------------------------------------------------------------
@@ -226,5 +238,34 @@ u_rsa_core : entity work.rsa_core
 		rsa_status             => rsa_status
 
 	);
+end generate;
+	
+	-- MULTICORE DESIGN HERE
+	msgout_data <= msgout_signal_array(0) when msgout_ready_vector(0) = '1' else
+	msgout_signal_array(1) when msgout_ready_vector(1) = '1' else
+	msgout_signal_array(2) when msgout_ready_vector(2) = '1' else
+	msgout_signal_array(3) when msgout_ready_vector(3) = '1' else
+	msgout_signal_array(4) when msgout_ready_vector(4) = '1' else
+	msgout_signal_array(5) when msgout_ready_vector(5) = '1';
+	
+	
+	
+	core_select : process(msgin_valid_vector, msgin_valid) is
+	begin 
+        if rising_edge(msgin_valid) then
+           msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
+        end if;
+	
+	end process;
+	
+	
+	
+	output_select : process(msgout_ready_vector) is
+	begin
+	if rising_edge(msgout_ready) then 
+	   msgout_ready_vector <= std_logic_vector(shift_left(unsigned(msgout_ready_vector), 1));
+	end if;
+	end process;
+	
 
 end rtl;
