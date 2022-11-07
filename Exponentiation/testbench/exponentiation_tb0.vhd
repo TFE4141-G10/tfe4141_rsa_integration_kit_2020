@@ -18,72 +18,87 @@
 -- 
 ----------------------------------------------------------------------------------
 
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity exponentiation_tb0 is
---  Port ( );
-end exponentiation_tb0;
+end entity;
 
 architecture behavior of exponentiation_tb0 is
-constant T : time := 20 ps; 
-constant A_C : integer := 51; 
-constant B_C : integer := 3; 
-constant N_C: integer := 55; 
-signal clk : std_logic := '0'; 
-signal reset_n : std_logic;
-signal count: unsigned(7 downto 0);
-signal valid_out: std_logic;
-signal key : std_logic_vector(255 downto 0);
-signal message, modulus : std_logic_vector(255 downto 0);
-signal result: std_logic_vector(255 downto 0);
-signal ready_out, ready_in: std_logic; 
-signal valid_in: std_logic:='0';
-
-
+    constant T                    : time := 20 ps;
+    signal   clk                  : std_logic := '0'; 
+    signal   reset_n              : std_logic;
+    signal   count                : unsigned(7 downto 0);
+    signal   valid_out            : std_logic;
+    signal   message              : std_logic_vector(255 downto 0); 
+    signal   key                  : std_logic_vector(255 downto 0);
+    signal   modulus              : std_logic_vector(255 downto 0);
+    signal   result               : std_logic_vector(255 downto 0);
+    signal   ready_out            : std_logic; 
+    signal   ready_in             : std_logic; 
+    signal   valid_in             : std_logic :='0';
+    signal   internal_message_out : std_logic_vector(255 downto 0);
 begin
     UUT : entity work.exponentiation port map ( 
-        ready_in => ready_in, 
-        valid_in => valid_in, 
-        ready_out => ready_out, 
-        message => message, 
-        key => key, 
-        modulus => modulus, 
-        result => result, 
-        valid_out => valid_out, 
-        clk => clk, 
-        reset_n => reset_n,
-        count => count
+        ready_in             => ready_in, 
+        valid_in             => valid_in, 
+        ready_out            => ready_out, 
+        message              => message, 
+        key                  => key, 
+        modulus              => modulus, 
+        result               => result, 
+        valid_out            => valid_out, 
+        clk                  => clk, 
+        reset_n              => reset_n,
+        count                => count,
+        internal_message_out => internal_message_out
     );
+
     clk <= not clk after T/2;
     
     stimuli : process
     begin
-        message <= (others => '0'), std_logic_vector(to_unsigned(B_C, 256)); -- after 5*T,(others => '0') after 10*T ;
-        key <= std_logic_vector(to_unsigned(A_C, 256));
-        modulus <= std_logic_vector(to_unsigned(N_C, 256));
+        message <= std_logic_vector(to_unsigned(51, 256));
+        key     <= std_logic_vector(to_unsigned( 3, 256));
+        modulus <= std_logic_vector(to_unsigned(55, 256));
         reset_n <= '0';
 
-        wait for 5*T;
-        reset_n <= '1';
+        wait for 4.5*T;
 
-        wait for 1*T;
+        reset_n  <= '1';
         valid_in <= '1';
 
-        wait for 4*T;
+        wait for T;
+
         valid_in <= '0';
 
-        wait;
+        wait for T;
+
+        message <= std_logic_vector(to_unsigned( 9, 256));
+        key     <= std_logic_vector(to_unsigned( 3, 256));
+        modulus <= std_logic_vector(to_unsigned(55, 256));
+
+        wait until valid_out = '1';
+        
+        assert result = std_logic_vector(to_unsigned(46, 256)) report "Test 1 failed" severity error;
+        
+        -- reset_n <= '0';
+
+        -- wait for T;
+
+        -- reset_n <= '1';
+        -- valid_in <= '1';
+
+        -- wait for T;
+
+        -- valid_in <= '0';
+
+        -- wait until valid_out = '1';
+
+        -- assert result = std_logic_vector(to_unsigned(14, 256)) report "Test 2 failed" severity error;
+        -- reset_n <= '0';
+
+        -- wait for T;
     end process;
 end architecture;
