@@ -23,12 +23,12 @@ use ieee.numeric_std.all;
 
 entity modulo is
     generic(
-        N : natural := 256
+        c_block_size : natural := 256
     );
     port(
-        numerator : in  unsigned(N - 1 downto 0);
-        modulus   : in  unsigned(N - 1 downto 0);
-        result    : out unsigned(N - 1 downto 0)
+        numerator : in  unsigned(c_block_size - 1 downto 0);
+        modulus   : in  unsigned(c_block_size - 1 downto 0);
+        result    : out unsigned(c_block_size - 1 downto 0)
     );
 end entity;
 

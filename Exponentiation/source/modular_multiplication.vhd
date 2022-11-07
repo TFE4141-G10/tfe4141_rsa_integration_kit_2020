@@ -24,24 +24,24 @@ use ieee.numeric_std.all;
 
 entity modular_multiplication is
     generic(
-        N : integer := 256
+        c_block_size : integer := 256
     );
     port(
         clk       : in  std_logic;
         reset_n   : in  std_logic;
         valid_out : out std_logic;
-        factor_a  : in  unsigned(N - 1 downto 0);
-        factor_b  : in  unsigned(N - 1 downto 0);
-        modulus   : in  unsigned(N - 1 downto 0);
-        result    : out unsigned(N - 1 downto 0)
+        factor_a  : in  unsigned(c_block_size - 1 downto 0);
+        factor_b  : in  unsigned(c_block_size - 1 downto 0);
+        modulus   : in  unsigned(c_block_size - 1 downto 0);
+        result    : out unsigned(c_block_size - 1 downto 0)
     );
 end entity;
 
 architecture rtl of modular_multiplication is
-    signal internal_addition : unsigned(N - 1 downto 0);
-    signal internal_modulo   : unsigned(N - 1 downto 0);
-    signal internal_result   : unsigned(N - 1 downto 0);
-    signal internal_factor_b : unsigned(N - 1 downto 0);
+    signal internal_addition : unsigned(c_block_size - 1 downto 0);
+    signal internal_modulo   : unsigned(c_block_size - 1 downto 0);
+    signal internal_result   : unsigned(c_block_size - 1 downto 0);
+    signal internal_factor_b : unsigned(c_block_size - 1 downto 0);
     signal counter           : unsigned(7 downto 0);
 begin
     ----------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ begin
     ----------------------------------------------------------------------------------
     i_modulo : entity work.modulo
         generic map (
-            N         => N
+            c_block_size         => c_block_size
         )
         port map (
             numerator => internal_addition, 
