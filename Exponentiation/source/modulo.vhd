@@ -20,6 +20,9 @@
 
 library ieee;
 use ieee.numeric_std.all;
+use ieee.std_logic_1164.all;
+
+
 
 entity modulo is
     generic(
@@ -27,15 +30,17 @@ entity modulo is
     );
     port(
         numerator : in  unsigned(c_block_size - 1 downto 0);
-        modulus   : in  unsigned(c_block_size - 1 downto 0);
+        modulus   : in  std_logic_vector(c_block_size - 1 downto 0);
         result    : out unsigned(c_block_size - 1 downto 0)
     );
 end entity;
 
 architecture rtl of modulo is
+
 begin
-    result <= numerator - shift_left(modulus, 1) when numerator >= shift_left(modulus, 1) else
-              numerator - modulus                when numerator >= modulus                else
+    
+    result <= numerator - shift_left(unsigned(modulus), 1) when numerator >= shift_left(unsigned(modulus), 1) else
+              numerator - unsigned(modulus)                when numerator >= unsigned(modulus)                else
               numerator;
 --    process(numerator, modulus) is
 --    begin

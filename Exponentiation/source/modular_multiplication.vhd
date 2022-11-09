@@ -30,10 +30,10 @@ entity modular_multiplication is
         clk       : in  std_logic;
         reset_n   : in  std_logic;
         valid_out : out std_logic;
-        factor_a  : in  unsigned(c_block_size - 1 downto 0);
-        factor_b  : in  unsigned(c_block_size - 1 downto 0);
-        modulus   : in  unsigned(c_block_size - 1 downto 0);
-        result    : out unsigned(c_block_size - 1 downto 0)
+        factor_a  : in  std_logic_vector(c_block_size - 1 downto 0);
+        factor_b  : in  std_logic_vector(c_block_size - 1 downto 0);
+        modulus   : in  std_logic_vector(c_block_size - 1 downto 0);
+        result    : out std_logic_vector(c_block_size - 1 downto 0)
     );
 end entity;
 
@@ -47,9 +47,9 @@ begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
     ----------------------------------------------------------------------------------
-    internal_factor_b <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
+    internal_factor_b <= unsigned(factor_b) when factor_a(to_integer(counter)) = '1' else (others => '0');
     internal_addition <= shift_left(internal_result, 1) + internal_factor_b;    
-    result            <= internal_result;
+    result            <= std_logic_vector(internal_result);
     
     ----------------------------------------------------------------------------------
     -- When the counter is equal to 0, it means that the calculation has iterated 
