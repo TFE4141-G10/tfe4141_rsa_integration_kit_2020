@@ -338,7 +338,7 @@ end generate;
 	
 	core_select : process(msgin_valid_vector, msgin_valid) is
 	begin 
-       if falling_edge(msgin_valid) then
+       if rising_edge(msgin_valid) then
           msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
        end if;
 	
