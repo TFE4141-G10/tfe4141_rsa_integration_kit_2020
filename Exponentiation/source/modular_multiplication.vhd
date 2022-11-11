@@ -38,11 +38,11 @@ entity modular_multiplication is
 end entity;
 
 architecture rtl of modular_multiplication is
-    signal internal_addition : unsigned(c_block_size - 1 downto 0);
-    signal internal_modulo   : unsigned(c_block_size - 1 downto 0);
-    signal internal_result   : unsigned(c_block_size - 1 downto 0);
-    signal internal_factor_b : unsigned(c_block_size - 1 downto 0);
-    signal counter           : unsigned(7 downto 0);
+    signal internal_addition : unsigned(c_block_size - 1 downto 0):= (others => '0');
+    signal internal_modulo   : unsigned(c_block_size - 1 downto 0):= (others => '0');
+    signal internal_result   : unsigned(c_block_size - 1 downto 0) := (others => '0');
+    signal internal_factor_b : unsigned(c_block_size - 1 downto 0):= (others => '0');
+    signal counter           : unsigned(7 downto 0):= (others => '1');
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication

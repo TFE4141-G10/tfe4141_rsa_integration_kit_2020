@@ -37,7 +37,9 @@ end entity;
 
 
 architecture rtl of exponentiation is
-    --type   multiplication_state_type is (single_multiplication, double_multiplication);
+    attribute keep : string;
+    
+        --type   multiplication_state_type is (single_multiplication, double_multiplication);
     type   message_state_type        is (uninitialized, idle, load_new_message);
     --signal multiplication_state       : multiplication_state_type := double_multiplication;
     --signal next_multiplication_state  : multiplication_state_type;
@@ -56,6 +58,22 @@ architecture rtl of exponentiation is
     signal clear_multiplication_n     : std_logic := '0';
     signal internal_valid_out         : std_logic := '0';
     signal last_multiplication        : std_logic := '0';
+    attribute keep of internal_result : signal is "true";
+    attribute keep of factor_a : signal is "true";
+    attribute keep of factor_b : signal is "true";
+    attribute keep of multiplication_done : signal is "true";
+    attribute keep of multiplication_result : signal is "true";
+    attribute keep of last_multiplication : signal is "true";
+    attribute keep of counter : signal is "true";
+    attribute keep of start_condition : signal is "true";
+    attribute keep of internal_valid_out : signal is "true";
+    
+    attribute keep_hierarchy : string;
+
+    attribute keep_hierarchy of rtl : architecture is "yes";
+    
+    
+    
 begin
     --------------------DEBUGGING------------------------------------------------------
     internal_message_out <= internal_message;
@@ -64,9 +82,12 @@ begin
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
     -- Blakley algorithm
-    ----------------------------------------------------------------------------------    
-    modular_multiplication_core: entity work.modular_multiplication 
+    ----------------------------------------------------------------------------------   
+
+ 
+    modular_multiplication_core: entity work.modular_multiplication
         generic map (
+            
             C_block_size => C_block_size
         )
         port map (
@@ -78,6 +99,7 @@ begin
             modulus                  => modulus, 
             valid_out                => multiplication_done
         );
+        
     
     ----------------------------------------------------------------------------------
     -- Result changes when internal result changes on the rising edge of the clock
@@ -95,7 +117,7 @@ begin
     begin
         if reset_n = '0' then
             internal_valid_out <= '0';
-        elsif falling_edge(last_multiplication) then
+        elsif rising_edge(last_multiplication) then
             internal_valid_out <= '1';
         end if;
     end process;
@@ -176,10 +198,10 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    process(multiplication_done, clk) is
+    process(multiplication_done) is
     begin
         clear_multiplication_n <= '1';
-        if falling_edge(multiplication_done) then
+        if rising_edge(multiplication_done) then
             clear_multiplication_n <= '0';
             internal_result <= multiplication_result;
             if double_multiplication = '1' and double_multiplication_done = '0' then
