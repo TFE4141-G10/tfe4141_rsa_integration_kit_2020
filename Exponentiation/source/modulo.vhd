@@ -26,15 +26,19 @@ entity modulo is
         C_block_size : natural := 256
     );
     port(
-        numerator : in  unsigned(C_block_size - 1 downto 0);
+        numerator : in  unsigned(C_block_size + 1 downto 0);
         modulus   : in  unsigned(C_block_size - 1 downto 0);
-        result    : out unsigned(C_block_size - 1 downto 0)
+        result    : out unsigned(C_block_size + 1 downto 0)
     );
 end entity;
 
 architecture rtl of modulo is
+
+    signal mod_cast : unsigned(c_block_size + 1 downto 0) := (1 => '1', others => '0');
+
     begin
-        result <= numerator mod modulus;
+        mod_cast(c_block_size -1 downto 0) <= modulus;
+        result <= numerator mod mod_cast;
 end architecture;
 
 -- architecture rtl of modulo is
