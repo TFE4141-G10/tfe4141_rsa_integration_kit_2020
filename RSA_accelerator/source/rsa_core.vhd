@@ -85,6 +85,7 @@ begin
 			reset_n   => reset_n
 		);
 
-	msgout_last  <= msgin_last;
+	msgout_last  <= msgin_last when msgout_valid = '1' else
+	'0';
 	rsa_status   <= (others => '0');
 end rtl;

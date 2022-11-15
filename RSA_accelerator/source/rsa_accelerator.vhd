@@ -124,6 +124,7 @@ architecture rtl of rsa_accelerator is
     signal rsa_status_1: std_logic_vector(31 downto 0); 
     signal msgout_signal_0: std_logic_vector(255 downto 0); 
     signal msgout_signal_1: std_logic_vector(255 downto 0); 
+    signal msgin_last_vector: std_logic_vector(255 downto 0);
     
 begin
 
@@ -269,7 +270,7 @@ port map (
     msgin_valid            => msgin_valid_vector(i),
     msgin_ready            => msgin_ready_vector(i),
     msgin_data             => msgin_data,
-    msgin_last             => msgin_last,
+    msgin_last             => msgin_last_vector(i),
 
     -----------------------------------------------------------------------------
     -- Master msgout interface
@@ -311,6 +312,7 @@ end generate;
 --	rsa_status_array(3) when msgout_ready_vector(3) = '1' else
 --	rsa_status_array(4) when msgout_ready_vector(4) = '1' else
 --	rsa_status_array(5) when msgout_ready_vector(5) = '1';
+
 	
 	msgout_last <= msgout_last_vector(0) when msgout_ready_vector(0) = '1' else
 	msgout_last_vector(1) when msgout_ready_vector(1) = '1';
@@ -336,19 +338,24 @@ end generate;
 	-- Multicore logic handeling
 	-----------------------------------------------------------------------------
 	
-	core_select : process(msgin_valid_vector, msgin_valid) is
+	core_select : process(msgin_valid_vector, msgin_ready, msgin_last) is
 	begin 
-       if rising_edge(msgin_valid) then
-          msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
-       end if;
-	
+        if msgin_ready = '1' and msgin_last = '0' then
+            msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
+        end if;
 	end process;
 	
+
+	last_vector: process(msgin_last) is 
+	   begin
+	   if msgin_last = '1' then
+	      msgin_last_vector <= msgin_valid_vector;
+       end if;
+       end process;
 	
-	
-	output_select : process(msgout_ready_vector, msgout_ready) is
+	output_select : process(msgout_ready_vector, msgout_ready, msgout_last) is
 	begin
-	if rising_edge(msgout_ready) then 
+	if msgout_ready = '1' and msgout_last = '0' then 
 	   msgout_ready_vector <= std_logic_vector(shift_left(unsigned(msgout_ready_vector), 1));
 	end if;
 	end process;
