@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 entity exponentiation is
 	generic (
-		C_block_size : integer := 256
+		C_BLOCK_SIZE : integer := 256
 	);
 	port (
 		--input controll
@@ -12,18 +12,18 @@ entity exponentiation is
 		ready_in	: out std_logic;
 
 		--input data
-		message 	: in  std_logic_vector(C_block_size - 1 downto 0);
-		key 		: in  std_logic_vector(C_block_size - 1 downto 0);
+		message 	: in  std_logic_vector(C_BLOCK_SIZE - 1 downto 0);
+		key 		: in  std_logic_vector(C_BLOCK_SIZE - 1 downto 0);
 
 		--ouput controll
 		ready_out	: in  std_logic;
 		valid_out	: out std_logic := '0';
 
 		--output data
-		result 		: out std_logic_vector(C_block_size - 1 downto 0);
+		result 		: out std_logic_vector(C_BLOCK_SIZE - 1 downto 0);
 
 		--modulus
-		modulus 	: in  std_logic_vector(C_block_size - 1 downto 0);
+		modulus 	: in  std_logic_vector(C_BLOCK_SIZE - 1 downto 0);
 
 		--utility
 		clk 		: in  std_logic;
@@ -42,11 +42,11 @@ architecture rtl of exponentiation is
     --signal next_multiplication_state  : multiplication_state_type;
     signal message_state              : message_state_type                          := uninitialized;
     signal next_message_state         : message_state_type                          := uninitialized;
-    signal internal_result            : std_logic_vector(C_block_size - 1 downto 0) := (others => '0');
-    signal factor_a                   : std_logic_vector(C_block_size - 1 downto 0) := (others => '0');
-    signal factor_b                   : std_logic_vector(C_block_size - 1 downto 0) := (others => '0');
-    signal start_condition            : std_logic_vector(C_block_size - 1 downto 0) := (others => '0');
-    signal multiplication_result      : std_logic_vector(C_block_size - 1 downto 0) := (others => '0');
+    signal internal_result            : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal factor_a                   : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal factor_b                   : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal start_condition            : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal multiplication_result      : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal multiplication_done        : std_logic;
     signal double_multiplication      : std_logic := '1';
     signal double_multiplication_done : std_logic := '0';
@@ -63,7 +63,7 @@ begin
     ----------------------------------------------------------------------------------    
     modular_multiplication_core: entity work.modular_multiplication 
         generic map (
-            C_block_size => C_block_size
+            C_BLOCK_SIZE => C_BLOCK_SIZE
         )
         port map (
             factor_a                 => unsigned(factor_a), 
@@ -104,11 +104,11 @@ begin
     ----------------------------------------------------------------------------------
     -- These processes decides what values to send to the modular multiplier
     ----------------------------------------------------------------------------------
-    factor_a        <= start_condition when counter = C_block_size - 1 else
+    factor_a        <= start_condition when counter = C_BLOCK_SIZE - 1 else
                        internal_result;
     factor_b        <= internal_message when double_multiplication_done = '1' else
                        factor_a;
-    start_condition <= internal_message when key(C_block_size - 1) = '1' else
+    start_condition <= internal_message when key(C_BLOCK_SIZE - 1) = '1' else
                        std_logic_vector(to_unsigned(1, 256)); 
 
     ----------------------------------------------------------------------------------
