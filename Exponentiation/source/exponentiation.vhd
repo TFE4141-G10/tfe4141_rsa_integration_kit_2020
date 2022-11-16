@@ -88,11 +88,11 @@ begin
     valid_out <= internal_valid_out;
     last_multiplication <= '1' when counter = 0 else '0';
 
-    process(last_multiplication, ready_out, internal_last, reset_n) is
+    process(last_multiplication, clk, ready_out, internal_last, reset_n) is
     begin
         if reset_n = '0' then
             internal_valid_out <= '0';
-        elsif falling_edge(ready_out) then
+        elsif rising_edge(clk) and ready_out then
             internal_valid_out <= '0';
         elsif falling_edge(last_multiplication) then
             internal_valid_out <= '1';
