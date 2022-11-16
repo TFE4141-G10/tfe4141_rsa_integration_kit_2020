@@ -36,10 +36,7 @@ end entity;
 
 
 architecture rtl of exponentiation is
-    --type   multiplication_state_type is (single_multiplication, double_multiplication);
     type   message_state_type        is (uninitialized, idle, load_new_message);
-    --signal multiplication_state       : multiplication_state_type := double_multiplication;
-    --signal next_multiplication_state  : multiplication_state_type;
     signal message_state              : message_state_type                          := uninitialized;
     signal next_message_state         : message_state_type                          := uninitialized;
     signal internal_result            : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
@@ -65,7 +62,7 @@ begin
     ----------------------------------------------------------------------------------    
     modular_multiplication_core: entity work.modular_multiplication 
         generic map (
-            C_BLOCK_SIZE => C_BLOCK_SIZE
+            C_BLOCK_SIZE             => C_BLOCK_SIZE
         )
         port map (
             factor_a                 => unsigned(factor_a), 
@@ -143,7 +140,7 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, message) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, internal_last_message_out, ready_out, message) is
     begin
         case message_state is
             when uninitialized =>
@@ -151,23 +148,21 @@ begin
                     ready_in <= '1';
                 end if;
                 if valid_in = '1' then
-                    internal_message   <= message;
                     internal_last_message_out <= last_message_in;
+                    internal_message   <= message;
                     next_message_state <= idle;
                 else
                     next_message_state <= uninitialized;
                 end if;
             when idle =>
+                ready_in <= '0';
                 if valid_in = '1' and internal_valid_out = '1' then
-                    --ready_in           <= '1';
                     next_message_state <= load_new_message;
                 else
-                    ready_in           <= '0';
                     next_message_state <= idle;
                 end if;
             when load_new_message =>
-                --ready_in               <= '1';
-                --last_message_out <= internal_last_message_out;
+
                 if ready_out = '1' then
                     internal_message   <= message;
                     next_message_state <= uninitialized;
@@ -179,6 +174,38 @@ begin
                 next_message_state <= idle;
         end case;
     end process;
+
+    -- DOES NOT WORK YET:
+    -- message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, message) is
+    --     begin
+    --         case message_state is
+    --             when uninitialized =>
+    --                 if valid_in = '1' then
+    --                     internal_last_message_out <= last_message_in;
+    --                     internal_message   <= message;
+    --                     next_message_state <= idle;
+    --                 else
+    --                     next_message_state <= uninitialized;
+    --                 end if;
+    --             when idle =>
+    --                 if valid_in = '1' and internal_valid_out = '1' then
+    --                     next_message_state <= load_new_message;
+    --                 else
+    --                     next_message_state <= idle;
+    --                 end if;
+    --             when load_new_message =>
+    --                 if ready_out = '1' then
+    --                     internal_message   <= message;
+    --                     next_message_state <= uninitialized;
+    --                 else
+    --                     next_message_state <= load_new_message;
+    --                 end if;
+    --             when others =>
+    --                 next_message_state <= idle;
+    --         end case;
+    --     end process;
+    
+    --     ready_in <= '1' when message_state = uninitialized and internal_last_message_out = '0' else '0';
 
 
     ----------------------------------------------------------------------------------
