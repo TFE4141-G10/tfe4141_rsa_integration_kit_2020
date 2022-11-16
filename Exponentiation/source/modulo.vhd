@@ -26,9 +26,9 @@ entity modulo is
         C_BLOCK_SIZE : natural := 256
     );
     port(
-        numerator : in  unsigned(C_BLOCK_SIZE + 1 downto 0);
+        numerator : in  unsigned(C_BLOCK_SIZE + 1 downto 0); -- 2 bit wider because of left shift and addition
         modulus   : in  unsigned(C_BLOCK_SIZE - 1 downto 0);
-        result    : out unsigned(C_BLOCK_SIZE + 1 downto 0)
+        result    : out unsigned(C_BLOCK_SIZE - 1 downto 0)
     );
 end entity;
 
