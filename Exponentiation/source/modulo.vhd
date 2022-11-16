@@ -39,5 +39,5 @@ begin
     result          <= internal_result(C_BLOCK_SIZE - 1 downto 0);
     internal_result <= numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else
                        numerator - modulus                when numerator >= ("00" & modulus)      else
-                       numerator(C_BLOCK_SIZE - 1 downto 0);          -- need to match signal lengths
+                       numerator;          -- need to match signal lengths
 end architecture;
