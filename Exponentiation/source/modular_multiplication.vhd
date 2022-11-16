@@ -38,20 +38,19 @@ entity modular_multiplication is
 end entity;
 
 architecture rtl of modular_multiplication is
-    signal internal_factor_b   : unsigned(C_BLOCK_SIZE - 1 downto 0);
+    signal internal_factor_b   : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal internal_left_shift : unsigned(C_BLOCK_SIZE - 0 downto 0) := (others => '0'); -- 1 bit wider because of left shift
     signal internal_addition   : unsigned(C_BLOCK_SIZE + 1 downto 0) := (others => '0'); -- 2 bits wider because of addition
     signal internal_modulo     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
-    
     signal counter             : unsigned(7 downto 0);
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
     ----------------------------------------------------------------------------------
     internal_factor_b   <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
-    internal_left_shift <= shift_left(internal_result, 1);
-    internal_addition   <= internal_left_shift + internal_factor_b;    
+    internal_left_shift <= internal_result & '0'; -- left shift by 1 bit
+    internal_addition   <= ('0' & internal_left_shift) + ("00" & internal_factor_b);    
     result              <= internal_result;
     
     ----------------------------------------------------------------------------------

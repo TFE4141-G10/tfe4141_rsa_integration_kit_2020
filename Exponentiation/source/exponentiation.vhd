@@ -29,8 +29,8 @@ entity exponentiation is
 		clk 		: in  std_logic;
 		reset_n 	: in  std_logic;
 		--last controll
-		last_in : in std_logic;
-		last_out: out std_logic
+		last_message_in : in std_logic;
+		last_message_out: out std_logic
 	);
 end entity;
 
@@ -55,7 +55,7 @@ architecture rtl of exponentiation is
     signal clear_multiplication_n     : std_logic := '0';
     signal internal_valid_out         : std_logic := '0';
     signal last_multiplication        : std_logic := '0';
-    signal internal_last              : std_logic := '0';
+    signal internal_last_message_out  : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
@@ -80,7 +80,6 @@ begin
     ----------------------------------------------------------------------------------
     result <= internal_result;
     
-
     ----------------------------------------------------------------------------------
     -- Valid result when counter wraps around to 255, and can be aquired during the
     -- whole 255 counter period. Need last_multiplication to not give valid_out in start
@@ -88,14 +87,14 @@ begin
     valid_out <= internal_valid_out;
     last_multiplication <= '1' when counter = 0 else '0';
 
-    process(last_multiplication, clk, ready_out, internal_last, reset_n) is
+    process(last_multiplication, clk, ready_out, internal_last_message_out, reset_n) is
     begin
-
         if reset_n = '0' then
             internal_valid_out <= '0';
         elsif falling_edge(last_multiplication) then
             internal_valid_out <= '1';
-            last_out <= internal_last;
+            last_message_out   <= internal_last_message_out;
+
         elsif rising_edge(clk) and ready_out = '1' then
             internal_valid_out <= '0';
         end if;
@@ -140,12 +139,12 @@ begin
     begin
         case message_state is
             when uninitialized =>
-                if internal_last = '0' then
-                ready_in <= '1';
+                if internal_last_message_out = '0' then
+                    ready_in <= '1';
                 end if;
                 if valid_in = '1' then
                     internal_message   <= message;
-                    internal_last <= last_in;
+                    internal_last_message_out <= last_message_in;
                     next_message_state <= idle;
                 else
                     next_message_state <= uninitialized;
@@ -160,7 +159,7 @@ begin
                 end if;
             when load_new_message =>
                 --ready_in               <= '1';
-                --last_out <= internal_last;
+                --last_message_out <= internal_last_message_out;
                 if ready_out = '1' then
                     internal_message   <= message;
                     next_message_state <= uninitialized;

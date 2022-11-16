@@ -19,6 +19,7 @@
 ----------------------------------------------------------------------------------
 
 library ieee;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity modulo is
@@ -26,15 +27,17 @@ entity modulo is
         C_BLOCK_SIZE : natural := 256
     );
     port(
-        numerator : in  unsigned(C_BLOCK_SIZE + 1 downto 0); -- 2 bit wider because of left shift and addition
-        modulus   : in  unsigned(C_BLOCK_SIZE - 1 downto 0);
-        result    : out unsigned(C_BLOCK_SIZE - 1 downto 0)
+        numerator    : in  unsigned(C_BLOCK_SIZE + 1 downto 0); -- 2 bit wider because of left shift and addition
+        modulus      : in  unsigned(C_BLOCK_SIZE - 1 downto 0);
+        result       : out unsigned(C_BLOCK_SIZE - 1 downto 0)
     );
 end entity;
 
 architecture rtl of modulo is
+    signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0);
 begin
-    result <= numerator - shift_left(modulus, 1) when numerator >= shift_left(modulus, 1) else
-              numerator - modulus                when numerator >= modulus                else
-              numerator;
+    result          <= internal_result(C_BLOCK_SIZE - 1 downto 0);
+    internal_result <= numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else
+                       numerator - modulus                when numerator >= ("00" & modulus)      else
+                       numerator(C_BLOCK_SIZE - 1 downto 0);          -- need to match signal lengths
 end architecture;
