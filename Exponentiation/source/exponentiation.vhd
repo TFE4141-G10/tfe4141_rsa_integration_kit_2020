@@ -55,6 +55,8 @@ architecture rtl of exponentiation is
     signal clear_multiplication_n     : std_logic := '0';
     signal internal_valid_out         : std_logic := '0';
     signal last_multiplication        : std_logic := '0';
+    signal exponentiation_done        : std_logic := '0';
+    signal result_sent_out            : std_logic := '0';
     signal internal_last_message_out  : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
@@ -84,19 +86,25 @@ begin
     -- Valid result when counter wraps around to 255, and can be aquired during the
     -- whole 255 counter period. Need last_multiplication to not give valid_out in start
     ----------------------------------------------------------------------------------
-    valid_out <= internal_valid_out;
     last_multiplication <= '1' when counter = 0 else '0';
+    internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
+    valid_out           <= internal_valid_out;
 
-    process(last_multiplication, clk, ready_out, internal_last_message_out, reset_n) is
+    check_if_exponentiation_done : process(last_multiplication, result_sent_out, internal_last_message_out) is
     begin
-        if reset_n = '0' then
-            internal_valid_out <= '0';
+        if result_sent_out = '1' then
+            exponentiation_done <= '0';
         elsif falling_edge(last_multiplication) then
-            internal_valid_out <= '1';
-            last_message_out   <= internal_last_message_out;
+            exponentiation_done <= '1';
+            last_message_out    <= internal_last_message_out;
+        end if;
+    end process;
 
-        elsif rising_edge(clk) and ready_out = '1' then
-            internal_valid_out <= '0';
+    detect_if_result_sent : process(clk, ready_out, internal_valid_out) is
+    begin
+        result_sent_out <= '0';
+        if rising_edge(clk) and ready_out = '1' and internal_valid_out = '1' then
+            result_sent_out <= '1';
         end if;
     end process;
  
@@ -195,45 +203,3 @@ begin
         end if;
     end process;
 end architecture;
-
-
-    ----------------------------------------------------------------------------------
-    -- c
-    ----------------------------------------------------------------------------------
-    --change_multiplication_state : process(multiplication_done, reset_n) is
-    --begin
-    --    if reset_n = '0' then
-    --        multiplication_state <= single_multiplication;
-    --    elsif falling_edge(multiplication_done) then
-    --        multiplication_state <= next_multiplication_state;
-    --    end if;
-    --end process;
-
-    ----------------------------------------------------------------------------------
-    -- 
-    ----------------------------------------------------------------------------------
-    --multiplication_state_machine : process(multiplication_state, double_multiplication) is
-    --begin
-    --    case multiplication_state is
-    --        when single_multiplication =>
-    --            if double_multiplication = '1' then
-    --                next_multiplication_state <= double_multiplication;
-    --            else
-    --                next_multiplication_state <= single_multiplication;
-    --            end if;
-    --        when double_multiplication =>
-    --            next_multiplication_state <= single_multiplication;
-    --    end case;
-    --end process;
-
-    ----------------------------------------------------------------------------------
-    -- 
-    ----------------------------------------------------------------------------------
-    --count_down : process(multiplication_done, double_multiplication, reset_n) is
-    --begin
-    --    if reset_n = '0' then
-    --        counter <= (others => '1');
-    --    elsif falling_edge(multiplication_done) and not double_multiplication then
-    --        counter <= counter - 1;
-    --    end if;
-    --end process;
