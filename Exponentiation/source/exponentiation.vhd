@@ -90,9 +90,10 @@ begin
 
     process(last_multiplication, clk, ready_out, internal_last, reset_n) is
     begin
+
         if reset_n = '0' then
             internal_valid_out <= '0';
-        elsif rising_edge(clk) and ready_out then
+        elsif rising_edge(clk) and ready_out = '1' then
             internal_valid_out <= '0';
         elsif falling_edge(last_multiplication) then
             internal_valid_out <= '1';
