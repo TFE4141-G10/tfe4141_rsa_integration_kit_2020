@@ -74,11 +74,12 @@ architecture rtl of rsa_core is
 	-- Signals for multicore design
 	-----------------------------------------------------------------------------
 	
-	signal msgin_valid_vector: std_logic_vector(N downto 0) := (0 => '1', others => '0');
+	signal msgin_valid_vector: std_logic_vector(N downto 0) := (others => '0');
 	signal msgout_valid_vector:std_logic_vector(N downto 0) := (others => '0');
 	signal msgin_ready_vector: std_logic_vector(N downto 0) := (others => '0');
     signal msgout_ready_vector: std_logic_vector(N downto 0) := (0 => '1', others => '0');
     signal msgout_last_vector:std_logic_vector(N downto 0) := (others => '0');
+    signal msgin_select_vector: std_logic_vector(N downto 0) := (0 => '1', others => '0');
     
     type data_array is array(N downto 0) of std_logic_vector(255 downto 0); 
     signal msgout_data_array : data_array;
@@ -89,6 +90,7 @@ architecture rtl of rsa_core is
     signal msgout_signal_0: std_logic_vector(255 downto 0); 
     signal msgout_signal_1: std_logic_vector(255 downto 0); 
     signal msgin_last_vector: std_logic_vector(255 downto 0);
+    
     
 begin
 --	i_exponentiation : entity work.exponentiation
@@ -188,8 +190,8 @@ end generate;
 	
 	
 	
-	msgin_valid_vector(0) <= msgin_valid;--  when msgin_valid_vector(0) = '1';
-	--msgin_valid_vector(1) <= msgin_valid  when msgin_valid_vector(1) = '1';
+	msgin_valid_vector(0) <= msgin_valid when msgin_select_vector(0) = '1';
+	msgin_valid_vector(1) <= msgin_valid  when msgin_select_vector(1) = '1';
 	
 	
 	
@@ -200,11 +202,11 @@ end generate;
 	-- Multicore logic handeling
 	-----------------------------------------------------------------------------
 	
-	core_select : process(clk, msgin_valid_vector, msgin_valid, msgin_last) is
+	core_select : process(clk, msgin_select_vector, msgin_valid, msgin_last) is
 	begin 
         if rising_edge(clk) then
             if msgin_valid = '1' and msgin_last = '0' then
-                --msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
+                msgin_select_vector <= std_logic_vector(shift_left(unsigned(msgin_select_vector), 1));
             end if;
         end if;
 	end process;
