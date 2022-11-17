@@ -144,9 +144,11 @@ begin
     begin
         case message_state is
             when uninitialized =>
-                -- if internal_last_message_out = '0' then
-                --     ready_in <= '1';
-                -- end if;
+                if internal_last_message_out = '0' then
+                    ready_in <= '1';
+                else
+                    ready_in <= '0';
+                end if;
                 if valid_in = '1' then
                     internal_message   <= message;
                     next_message_state <= idle;
@@ -154,41 +156,32 @@ begin
                     next_message_state <= uninitialized;
                 end if;
             when idle =>
-                --ready_in <= '0';
+                ready_in <= '0';
                 if valid_in = '1' and internal_valid_out = '1' then
                     next_message_state <= load_new_message;
                 else
                     next_message_state <= idle;
                 end if;
             when load_new_message =>
-                --ready_in <= '0';
+                ready_in <= '0';
                 if ready_out = '1' then
                     next_message_state <= uninitialized;
                 else
                     next_message_state <= load_new_message;
                 end if;
             when others =>
-                --ready_in           <= '0';
+                ready_in           <= '0';
                 next_message_state <= idle;
         end case;
     end process;
 
     ----------------------------------------------------------------------------------
-    -- Sets last message out signal 
+    -- Sets last message out signal high when the last message has been received
     ----------------------------------------------------------------------------------
     set_last_message_out : process(clk, message_state, valid_in, last_message_in) is
     begin
         if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
             internal_last_message_out <= last_message_in;
-        end if;
-    end process;
-
-    set_ready_in : process(clk, message_state, internal_last_message_out) is
-    begin
-        if message_state = idle or message_state = load_new_message then
-            ready_in <= '0';
-        elsif message_state = uninitialized and internal_last_message_out = '0' then
-            ready_in <= '1';
         end if;
     end process;
 
