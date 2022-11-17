@@ -182,14 +182,14 @@ end generate;
 	--msgin_valid <= msgin_valid_vector(0) when msgout_ready_vector(0) = '1' else
 	--msgin_valid_vector(1) when msgout_ready_vector(1) = '1';
 	
-	msgin_ready <= msgin_ready_vector(0) when msgin_valid_vector(0) = '1' else
-	msgin_ready_vector(1) when msgin_valid_vector(1) = '1';
+	msgin_ready <= msgin_ready_vector(0); --when msgin_valid_vector(0) = '1' else
+	--msgin_ready_vector(1) when msgin_valid_vector(1) = '1';
 	
 	
 	
 	
-	-- msgin_valid <= msgin_valid_vector(0) when msgin_valid_vector(0) = '1' else
-	-- msgin_valid_vector(1) when msgin_valid_vector(1) = '1';
+	msgin_valid_vector(0) <= msgin_valid;--  when msgin_valid_vector(0) = '1';
+	--msgin_valid_vector(1) <= msgin_valid  when msgin_valid_vector(1) = '1';
 	
 	
 	
@@ -204,7 +204,7 @@ end generate;
 	begin 
         if rising_edge(clk) then
             if msgin_valid = '1' and msgin_last = '0' then
-                msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
+                --msgin_valid_vector <= std_logic_vector(shift_left(unsigned(msgin_valid_vector), 1));
             end if;
         end if;
 	end process;
