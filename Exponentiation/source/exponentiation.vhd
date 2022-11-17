@@ -148,7 +148,6 @@ begin
                     ready_in <= '1';
                 end if;
                 if valid_in = '1' then
-                    internal_last_message_out <= last_message_in;
                     internal_message   <= message;
                     next_message_state <= idle;
                 else
@@ -162,9 +161,9 @@ begin
                     next_message_state <= idle;
                 end if;
             when load_new_message =>
-
+                ready_in <= '0';
                 if ready_out = '1' then
-                    internal_message   <= message;
+                    -- internal_message   <= message;
                     next_message_state <= uninitialized;
                 else
                     next_message_state <= load_new_message;
@@ -173,6 +172,16 @@ begin
                 ready_in           <= '0';
                 next_message_state <= idle;
         end case;
+    end process;
+
+    ----------------------------------------------------------------------------------
+    -- Sets 
+    ----------------------------------------------------------------------------------
+    set_last_message_out : process(clk, message_state, valid_in, last_message_in) is
+    begin
+        if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
+            internal_last_message_out <= last_message_in;
+        end if;
     end process;
 
     -- DOES NOT WORK YET:
@@ -195,7 +204,7 @@ begin
     --                 end if;
     --             when load_new_message =>
     --                 if ready_out = '1' then
-    --                     internal_message   <= message;
+    --                     --internal_message   <= message;
     --                     next_message_state <= uninitialized;
     --                 else
     --                     next_message_state <= load_new_message;
@@ -205,7 +214,8 @@ begin
     --         end case;
     --     end process;
     
-    --     ready_in <= '1' when message_state = uninitialized and internal_last_message_out = '0' else '0';
+    --     ready_in <= '1' when message_state = uninitialized and internal_last_message_out = '0' else 
+    --                 '0';
 
 
     ----------------------------------------------------------------------------------
