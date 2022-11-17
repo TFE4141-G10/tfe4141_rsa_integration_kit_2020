@@ -141,7 +141,7 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, second_to_last_message_out, internal_valid_out, ready_out, message) is
+    message_state_machine : process(message_state, valid_in, second_to_last_message_out, internal_valid_out, ready_out) is
     begin
         case message_state is
             when uninitialized =>
@@ -151,7 +151,7 @@ begin
                     ready_in <= '0';
                 end if;
                 if valid_in = '1' then
-                    internal_message   <= message;
+                    --internal_message   <= message;
                     next_message_state <= idle;
                 else
                     next_message_state <= uninitialized;
@@ -176,8 +176,10 @@ begin
         end case;
     end process;
 
-
-    acquire_new_message : process(clk, message_state, valid_in) is
+    ----------------------------------------------------------------------------------
+    -- 
+    ----------------------------------------------------------------------------------
+    acquire_new_message : process(clk, message_state, valid_in, message) is
     begin
         if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
             internal_message <= message;
