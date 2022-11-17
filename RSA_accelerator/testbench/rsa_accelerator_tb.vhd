@@ -335,7 +335,7 @@ begin
 			tc_ctrl_state          <= e_TC_START_TC;
 			key_n                  <= (others => '0');
 			key_e_d                <= (others => '0');
-			test_case_id           <= 0;
+			test_case_id           <= 2;
 			start_tc               <= '0';
 
 		elsif (clk'event and clk='1') then

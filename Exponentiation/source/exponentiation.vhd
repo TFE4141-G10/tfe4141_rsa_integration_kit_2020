@@ -176,6 +176,14 @@ begin
         end case;
     end process;
 
+
+    acquire_new_message : process(clk, message_state, valid_in) is
+    begin
+        if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
+            internal_message <= message;
+        end if;
+    end process;
+
     ----------------------------------------------------------------------------------
     -- Sets last message out signal high when the last message has been received
     ----------------------------------------------------------------------------------
