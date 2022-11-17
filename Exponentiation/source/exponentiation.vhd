@@ -28,6 +28,7 @@ entity exponentiation is
 		--utility
 		clk 		: in  std_logic;
 		reset_n 	: in  std_logic;
+
 		--last controll
 		last_message_in : in std_logic;
 		last_message_out: out std_logic
@@ -54,7 +55,7 @@ architecture rtl of exponentiation is
     signal last_multiplication        : std_logic := '0';
     signal exponentiation_done        : std_logic := '0';
     signal result_sent_out            : std_logic := '0';
-    signal internal_last_message_out  : std_logic := '0';
+    signal second_to_last_message_out : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
@@ -87,13 +88,13 @@ begin
     internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
     valid_out           <= internal_valid_out;
 
-    check_if_exponentiation_done : process(last_multiplication, result_sent_out, internal_last_message_out) is
+    check_if_exponentiation_done : process(last_multiplication, result_sent_out, second_to_last_message_out) is
     begin
         if result_sent_out = '1' then
             exponentiation_done <= '0';
         elsif falling_edge(last_multiplication) then
             exponentiation_done <= '1';
-            last_message_out    <= internal_last_message_out;
+            last_message_out    <= second_to_last_message_out;
         end if;
     end process;
 
@@ -140,11 +141,11 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, message) is
+    message_state_machine : process(message_state, valid_in, second_to_last_message_out, internal_valid_out, ready_out, message) is
     begin
         case message_state is
             when uninitialized =>
-                if internal_last_message_out = '0' then
+                if second_to_last_message_out = '0' then
                     ready_in <= '1';
                 else
                     ready_in <= '0';
@@ -181,7 +182,7 @@ begin
     set_last_message_out : process(clk, message_state, valid_in, last_message_in) is
     begin
         if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
-            internal_last_message_out <= last_message_in;
+            second_to_last_message_out <= last_message_in;
         end if;
     end process;
 
