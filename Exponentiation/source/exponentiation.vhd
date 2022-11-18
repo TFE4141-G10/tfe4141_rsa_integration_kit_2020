@@ -213,34 +213,28 @@ begin
     ----------------------------------------------------------------------------------
     message_state_machine : process(message_state, valid_in, second_to_last_result_out, internal_valid_out, ready_out) is
     begin
+        ready_in <= '0';
         case message_state is
             when uninitialized =>
-                if second_to_last_result_out = '0' then
-                    ready_in <= '1';
-                else
-                    ready_in <= '0';
-                end if;
+                ready_in <= '1';
                 if valid_in = '1' then
                     next_message_state <= idle;
                 else
                     next_message_state <= uninitialized;
                 end if;
             when idle =>
-                ready_in <= '0';
-                if valid_in = '1' and internal_valid_out = '1' then
+                if internal_valid_out = '1' then
                     next_message_state <= load_new_message;
                 else
                     next_message_state <= idle;
                 end if;
             when load_new_message =>
-                ready_in <= '0';
                 if ready_out = '1' then
                     next_message_state <= uninitialized;
                 else
                     next_message_state <= load_new_message;
                 end if;
             when others =>
-                ready_in           <= '0';
                 next_message_state <= idle;
         end case;
     end process;
