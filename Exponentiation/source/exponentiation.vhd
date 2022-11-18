@@ -144,7 +144,7 @@ begin
     begin
         case message_state is
             when uninitialized =>
-                    ready_in <= '1';
+                   ready_in <= '1';
                 if valid_in = '1' then
                     internal_last_message_out <= last_message_in;
                     internal_message   <= message;

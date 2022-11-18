@@ -92,26 +92,6 @@ architecture rtl of rsa_core is
     
     
 begin
---	i_exponentiation : entity work.exponentiation
---		generic map (
---			C_BLOCK_SIZE => C_BLOCK_SIZE
---		)
---		port map (
---			message      => msgin_data  ,
---			key          => key_e_d     ,
---			valid_in     => msgin_valid ,
---			ready_in     => msgin_ready ,
---			ready_out    => msgout_ready,
---			valid_out    => msgout_valid,
---			result       => msgout_data ,
---			modulus      => key_n       ,
---			clk          => clk         ,
---			last_message_in      => msgin_last  ,
---			last_message_out     => msgout_last ,
---			reset_n      => reset_n
---		);
---	rsa_status <= (others => '0');
-
 generate_cores : for i in 0 to N generate
     u_rsa_exponentiation : entity work.exponentiation
 generic map (
@@ -130,21 +110,21 @@ port map (
     valid_in            => msgin_valid_vector(i),
     ready_in            => msgin_ready_vector(i),
     message             => msgin_data,
-    last_message_in             => msgin_last_vector(i),
+    last_message_in     => msgin_last_vector(i),
 
     -----------------------------------------------------------------------------
     -- Master msgout interface
     -----------------------------------------------------------------------------
     valid_out           => msgout_valid_vector(i),
-    ready_out         => msgout_ready_vector(i),
-    result            => msgout_data_array(i),
-    last_message_out            => msgout_last_vector(i),
+    ready_out           => msgout_ready_vector(i),
+    result              => msgout_data_array(i),
+    last_message_out    => msgout_last_vector(i),
 
     -----------------------------------------------------------------------------
     -- Interface to the register block
     -----------------------------------------------------------------------------
-    key                => key_e_d,
-    modulus                  => key_n
+    key                 => key_e_d,
+    modulus             => key_n
     --rsa_status             => rsa_status_array(i)
 
     );
@@ -161,36 +141,47 @@ port map (
 
 end generate;
 	
-	-----------------------------------------------------------------------------
-	-- Multicore signal handeling
-	-----------------------------------------------------------------------------
-	msgout_data <= msgout_data_array(0) when msgout_select_vector(0) = '1' else
-	msgout_data_array(1) when msgout_select_vector(1) = '1' else
-	msgout_data_array(2) when msgout_select_vector(2) = '1' else
-	(others => '0');
+------------------------------------------------
 
-	rsa_status <= rsa_status_array(0) when msgout_select_vector(0) = '1' else
-	rsa_status_array(1) when msgout_select_vector(1) = '1' else
-	rsa_status_array(2) when msgout_select_vector(2) = '1' else
-	(others => '0'); 
+---------------Phyton generated cases-----------
 
-	
-	msgout_last <= msgout_last_vector(0) when msgout_select_vector(0) = '1' else
-	msgout_last_vector(1) when msgout_select_vector(1) = '1' else
-	msgout_last_vector(2) when msgout_select_vector(2) = '1' else
-	'0';
-	
-	
-	msgin_ready <= msgin_ready_vector(0) when msgin_select_vector(0) = '1' else
-	msgin_ready_vector(1) when msgin_select_vector(1) = '1' else
-	msgin_ready_vector(2) when msgin_select_vector(2) = '1' else
-	'0';
-	
-	
-	msgout_valid <= msgout_valid_vector(0) when msgout_select_vector(0) = '1' else
-	msgout_valid_vector(1) when msgout_select_vector(1) = '1' else
-	msgout_valid_vector(2) when msgout_select_vector(2) = '1' else
-	'0';	
+------------------------------------------------
+
+msgout_data <= msgout_data_array(0) when msgout_select_vector(0) = '1' else
+msgout_data_array(1) when msgout_select_vector(1) = '1' else
+msgout_data_array(2) when msgout_select_vector(2) = '1' else
+(others => '0');
+
+
+rsa_status <= rsa_status_array(0) when msgout_select_vector(0) = '1' else
+rsa_status_array(1) when msgout_select_vector(1) = '1' else
+rsa_status_array(2) when msgout_select_vector(2) = '1' else
+(others => '0');
+
+
+msgout_last <= msgout_last_vector(0) when msgout_select_vector(0) = '1' else
+msgout_last_vector(1) when msgout_select_vector(1) = '1' else
+msgout_last_vector(2) when msgout_select_vector(2) = '1' else
+'0';
+
+
+msgin_ready <= msgin_ready_vector(0) when msgin_select_vector(0) = '1' else
+msgin_ready_vector(1) when msgin_select_vector(1) = '1' else
+msgin_ready_vector(2) when msgin_select_vector(2) = '1' else
+'0';
+
+
+msgout_valid <= msgout_valid_vector(0) when msgout_select_vector(0) = '1' else
+msgout_valid_vector(1) when msgout_select_vector(1) = '1' else
+msgout_valid_vector(2) when msgout_select_vector(2) = '1' else
+'0';
+
+
+------------------------------------------------
+
+---------end of phyton generated cases----------
+
+------------------------------------------------
 	
 	
 	
