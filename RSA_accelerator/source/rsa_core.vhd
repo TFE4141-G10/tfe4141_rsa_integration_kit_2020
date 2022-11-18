@@ -23,7 +23,7 @@ entity rsa_core is
 	generic (
 		-- Users to add parameters here
 		C_BLOCK_SIZE           : integer := 256;
-		N : integer := 1
+		N : integer := 2
 	);
 	port (
 		-----------------------------------------------------------------------------
@@ -164,27 +164,32 @@ end generate;
 	-----------------------------------------------------------------------------
 	-- Multicore signal handeling
 	-----------------------------------------------------------------------------
-	msgout_data <= msgout_data_array(0) when msgout_ready_vector(0) = '1' else
-	msgout_data_array(1) when msgout_ready_vector(1) = '1' else
+	msgout_data <= msgout_data_array(0) when msgout_select_vector(0) = '1' else
+	msgout_data_array(1) when msgout_select_vector(1) = '1' else
+	msgout_data_array(2) when msgout_select_vector(2) = '1' else
 	(others => '0');
 
 	rsa_status <= rsa_status_array(0) when msgout_select_vector(0) = '1' else
 	rsa_status_array(1) when msgout_select_vector(1) = '1' else
+	rsa_status_array(2) when msgout_select_vector(2) = '1' else
 	(others => '0'); 
 
 	
 	msgout_last <= msgout_last_vector(0) when msgout_select_vector(0) = '1' else
 	msgout_last_vector(1) when msgout_select_vector(1) = '1' else
+	msgout_last_vector(2) when msgout_select_vector(2) = '1' else
 	'0';
 	
 	
 	msgin_ready <= msgin_ready_vector(0) when msgin_select_vector(0) = '1' else
 	msgin_ready_vector(1) when msgin_select_vector(1) = '1' else
+	msgin_ready_vector(2) when msgin_select_vector(2) = '1' else
 	'0';
 	
 	
 	msgout_valid <= msgout_valid_vector(0) when msgout_select_vector(0) = '1' else
 	msgout_valid_vector(1) when msgout_select_vector(1) = '1' else
+	msgout_valid_vector(2) when msgout_select_vector(2) = '1' else
 	'0';	
 	
 	
@@ -194,12 +199,12 @@ end generate;
 	-- Multicore logic handeling
 	-----------------------------------------------------------------------------
 	
-	input_select : process(clk, msgin_select_vector, msgin_valid, msgin_last) is
+	input_select : process(clk, msgin_select_vector, msgin_valid, msgin_ready) is
 	begin 
         if rising_edge(clk) then
-            if msgin_valid = '1' and msgin_last = '0' then
+            if msgin_valid = '1' and msgin_ready = '1' then
                 if msgin_select_vector(N) = '1' then
-                  msgin_select_vector <= (0 => '1', others => '0');
+                   msgin_select_vector <= (0 => '1', others => '0');
                 else
                 msgin_select_vector <= std_logic_vector(shift_left(unsigned(msgin_select_vector), 1));
                 end if;
@@ -211,7 +216,7 @@ end generate;
 	output_select : process(clk, msgout_select_vector, msgout_ready, msgout_valid) is
 	begin
         if rising_edge(clk) then
-            if msgout_ready = '1' and msgout_valid = '1' and msgout_last = '0' then
+            if msgout_ready = '1' and msgout_valid = '1' then
                if msgout_select_vector(N) = '1' then
                   msgout_select_vector <= (0 => '1', others => '0');
                else

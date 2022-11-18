@@ -144,9 +144,7 @@ begin
     begin
         case message_state is
             when uninitialized =>
-                if internal_last_message_out = '0' then
                     ready_in <= '1';
-                end if;
                 if valid_in = '1' then
                     internal_last_message_out <= last_message_in;
                     internal_message   <= message;
@@ -156,7 +154,7 @@ begin
                 end if;
             when idle =>
                 ready_in <= '0';
-                if valid_in = '1' and internal_valid_out = '1' then
+                if internal_valid_out = '1' then
                     next_message_state <= load_new_message;
                 else
                     next_message_state <= idle;
