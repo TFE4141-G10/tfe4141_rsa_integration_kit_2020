@@ -73,18 +73,18 @@ begin
 			C_BLOCK_SIZE => C_BLOCK_SIZE
 		)
 		port map (
-			message          => msgin_data  ,
-			key              => key_e_d     ,
-			valid_in         => msgin_valid ,
-			ready_in         => msgin_ready ,
-			ready_out        => msgout_ready,
-			valid_out        => msgout_valid,
-			result           => msgout_data ,
-			modulus          => key_n       ,
-			clk              => clk         ,
-			last_message_in  => msgin_last  ,
-			last_message_out => msgout_last ,
-			reset_n          => reset_n
+			message         => msgin_data  ,
+			key             => key_e_d     ,
+			valid_in        => msgin_valid ,
+			ready_in        => msgin_ready ,
+			ready_out       => msgout_ready,
+			valid_out       => msgout_valid,
+			result          => msgout_data ,
+			modulus         => key_n       ,
+			clk             => clk         ,
+			last_message_in => msgin_last  ,
+			last_result_out => msgout_last ,
+			reset_n         => reset_n
 		);
 	rsa_status <= (others => '0'); -- Not used
 end rtl;

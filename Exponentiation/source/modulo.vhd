@@ -1,21 +1,12 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 06.10.2022 17:48:15
--- Design Name: 
--- Module Name: modulo - behavior
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
+-- File: modulo.vhd
+-- Description: Calculates the modulo, result = numerator % modulus.
+-- Create Date: 20/10/2022
+-- Design Name: modulo
+-- Module Name: modulo
+-- Project Name: RSA_accelerator
+-- Target Devices: PYNC-Z1
+-- Dependencies: modulo.vhd
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -34,10 +25,10 @@ entity modulo is
 end entity;
 
 architecture rtl of modulo is
-    signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0);
+    signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0); -- need to match signal lengths
 begin
     result          <= internal_result(C_BLOCK_SIZE - 1 downto 0);
     internal_result <= numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else
                        numerator - modulus                when numerator >= ("00" & modulus)      else
-                       numerator;          -- need to match signal lengths
+                       numerator;
 end architecture;

@@ -1,21 +1,14 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 10/03/2022 03:15:41 PM
--- Design Name: 
--- Module Name: Blakley - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
+-- File: modular_multiplication.vhd
+-- Description: Calculates the modular multiplication, result = a*b % modulus, 
+--              using the Blakley algorithm.
+--              Used in exponentiation algorithm for RSA decryption/encryption
+-- Create Date: 10/11/2022
+-- Design Name: modular_multiplication
+-- Module Name: modular_multiplication
+-- Project Name: RSA_accelerator
+-- Target Devices: PYNC-Z1
+-- Dependencies: modulo.vhd
 ----------------------------------------------------------------------------------
 
 library ieee;
