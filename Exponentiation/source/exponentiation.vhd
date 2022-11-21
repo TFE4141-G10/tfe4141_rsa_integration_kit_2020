@@ -144,8 +144,9 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(multiplication_done, clk) is
+    control_multiplication_flow : process(multiplication_done, clk, message_state) is
     begin
+        
         clear_multiplication_n <= '1';
         if rising_edge(clk) and multiplication_done = '1' then
             clear_multiplication_n <= '0';
@@ -153,7 +154,9 @@ begin
             if double_multiplication = '1' and double_multiplication_done = '0' then
                 double_multiplication_done <= '1';
             else
+                if message_state = idle then
                 counter <= counter - 1;
+                end if;
                 double_multiplication_done <= '0';
             end if;
         end if;
