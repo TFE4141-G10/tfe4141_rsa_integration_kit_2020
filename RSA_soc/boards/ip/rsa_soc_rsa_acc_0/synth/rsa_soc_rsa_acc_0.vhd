@@ -95,7 +95,6 @@ ARCHITECTURE rsa_soc_rsa_acc_0_arch OF rsa_soc_rsa_acc_0 IS
   COMPONENT RSA_accelerator IS
     GENERIC (
       C_BLOCK_SIZE : INTEGER;
-      N : INTEGER;
       C_S00_AXI_DATA_WIDTH : INTEGER;
       C_S00_AXI_ADDR_WIDTH : INTEGER;
       C_S00_AXIS_TDATA_WIDTH : INTEGER;
@@ -141,7 +140,7 @@ ARCHITECTURE rsa_soc_rsa_acc_0_arch OF rsa_soc_rsa_acc_0 IS
   ATTRIBUTE CHECK_LICENSE_TYPE : STRING;
   ATTRIBUTE CHECK_LICENSE_TYPE OF rsa_soc_rsa_acc_0_arch : ARCHITECTURE IS "rsa_soc_rsa_acc_0,RSA_accelerator,{}";
   ATTRIBUTE CORE_GENERATION_INFO : STRING;
-  ATTRIBUTE CORE_GENERATION_INFO OF rsa_soc_rsa_acc_0_arch: ARCHITECTURE IS "rsa_soc_rsa_acc_0,RSA_accelerator,{x_ipProduct=Vivado 2020.1,x_ipVendor=xilinx.com,x_ipLibrary=user,x_ipName=RSA_accelerator,x_ipVersion=1.0,x_ipCoreRevision=2,x_ipLanguage=VHDL,x_ipSimLanguage=VHDL,C_BLOCK_SIZE=256,N=1,C_S00_AXI_DATA_WIDTH=32,C_S00_AXI_ADDR_WIDTH=8,C_S00_AXIS_TDATA_WIDTH=32,C_M00_AXIS_TDATA_WIDTH=32,C_M00_AXIS_START_COUNT=32}";
+  ATTRIBUTE CORE_GENERATION_INFO OF rsa_soc_rsa_acc_0_arch: ARCHITECTURE IS "rsa_soc_rsa_acc_0,RSA_accelerator,{x_ipProduct=Vivado 2020.1,x_ipVendor=xilinx.com,x_ipLibrary=user,x_ipName=RSA_accelerator,x_ipVersion=1.0,x_ipCoreRevision=2,x_ipLanguage=VHDL,x_ipSimLanguage=VHDL,C_BLOCK_SIZE=256,C_S00_AXI_DATA_WIDTH=32,C_S00_AXI_ADDR_WIDTH=8,C_S00_AXIS_TDATA_WIDTH=32,C_M00_AXIS_TDATA_WIDTH=32,C_M00_AXIS_START_COUNT=32}";
   ATTRIBUTE IP_DEFINITION_SOURCE : STRING;
   ATTRIBUTE IP_DEFINITION_SOURCE OF rsa_soc_rsa_acc_0_arch: ARCHITECTURE IS "package_project";
   ATTRIBUTE X_INTERFACE_INFO : STRING;
@@ -187,7 +186,6 @@ BEGIN
   U0 : RSA_accelerator
     GENERIC MAP (
       C_BLOCK_SIZE => 256,
-      N => 1,
       C_S00_AXI_DATA_WIDTH => 32,
       C_S00_AXI_ADDR_WIDTH => 8,
       C_S00_AXIS_TDATA_WIDTH => 32,

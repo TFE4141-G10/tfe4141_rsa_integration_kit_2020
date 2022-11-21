@@ -95,7 +95,6 @@ ARCHITECTURE rsa_soc_rsa_acc_0_arch OF rsa_soc_rsa_acc_0 IS
   COMPONENT RSA_accelerator IS
     GENERIC (
       C_BLOCK_SIZE : INTEGER;
-      N : INTEGER;
       C_S00_AXI_DATA_WIDTH : INTEGER;
       C_S00_AXI_ADDR_WIDTH : INTEGER;
       C_S00_AXIS_TDATA_WIDTH : INTEGER;
@@ -181,7 +180,6 @@ BEGIN
   U0 : RSA_accelerator
     GENERIC MAP (
       C_BLOCK_SIZE => 256,
-      N => 1,
       C_S00_AXI_DATA_WIDTH => 32,
       C_S00_AXI_ADDR_WIDTH => 8,
       C_S00_AXIS_TDATA_WIDTH => 32,
