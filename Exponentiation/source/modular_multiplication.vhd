@@ -36,15 +36,16 @@ architecture rtl of modular_multiplication is
     signal internal_addition   : unsigned(C_BLOCK_SIZE + 1 downto 0) := (others => '0'); -- 2 bits wider because of addition
     signal internal_modulo     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
-    signal counter             : unsigned(7 downto 0);
+    signal counter             : unsigned(8 downto 0);
     signal last_calculation    : std_logic;
     signal pipeline_uninit     : std_logic := '1';
+    signal pipe_select         : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
     ----------------------------------------------------------------------------------
-    internal_factor_b   <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
-    internal_left_shift <= internal_result & '0'; -- left shift by 1 bit   
+    internal_factor_b   <= factor_b when factor_a(to_integer(counter(8 downto 1))) = '1' else (others => '0');
+    internal_left_shift <= internal_result & '0'; -- left shift by 1 bit
     result              <= internal_result;
     
     ----------------------------------------------------------------------------------
@@ -52,6 +53,7 @@ begin
     -- and the result is valid on rising edge of valid_out.
     ----------------------------------------------------------------------------------
     last_calculation <= '1' when counter = 0 else '0';
+    -- valid_out <= '1' when counter = 0 else '0';
 
     check_if_multiplication_done : process(last_calculation, reset_n) is
     begin
@@ -65,10 +67,10 @@ begin
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------
-    count_down : process(clk, reset_n, pipeline_uninit) is
+    count_down : process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            counter <= (others => '1');
+            counter <= (0 => '0', others => '1');
         elsif rising_edge(clk) and pipeline_uninit = '0' then
             counter <= counter - 1;
         end if;
@@ -77,7 +79,7 @@ begin
     ----------------------------------------------------------------------------------
     -- fill_pipeline: Ensures that one extra clock cycle is used to fill the pipeline.
     ----------------------------------------------------------------------------------
-    fill_pipeline : process(clk) is
+    fill_pipeline : process(clk, reset_n) is
     begin
         if reset_n = '0' then
             pipeline_uninit <= '1';
@@ -92,11 +94,20 @@ begin
     pipeline : process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            internal_result   <= (others => '0');
             internal_addition <= (others => '0');
+            internal_result   <= (others => '0');
+            pipe_select       <= '0';
         elsif rising_edge(clk) then
-            internal_addition <= ('0' & internal_left_shift) + ("00" & internal_factor_b);  
-            internal_result   <= internal_modulo;    
+            case pipe_select is
+                when '0' => 
+                    internal_addition <= ('0' & internal_left_shift) + ("00" & internal_factor_b); 
+                    pipe_select       <= '1';
+                when '1' => 
+                    internal_result   <= internal_modulo; 
+                    pipe_select       <= '0';
+                when others => 
+                    null;
+            end case;
         end if;
     end process;
     
