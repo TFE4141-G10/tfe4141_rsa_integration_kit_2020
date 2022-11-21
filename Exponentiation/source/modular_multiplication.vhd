@@ -37,13 +37,13 @@ architecture rtl of modular_multiplication is
     signal internal_modulo     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal counter             : unsigned(7 downto 0);
+    signal pipeline_uninit     : unsigned(1 downto 0);
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
     ----------------------------------------------------------------------------------
     internal_factor_b   <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
-    internal_left_shift <= internal_result & '0'; -- left shift by 1 bit
-    internal_addition   <= ('0' & internal_left_shift) + ("00" & internal_factor_b);    
+    internal_left_shift <= internal_result & '0'; -- left shift by 1 bit   
     result              <= internal_result;
     
     ----------------------------------------------------------------------------------
@@ -55,12 +55,24 @@ begin
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------
-    count_down : process(clk, reset_n) is
+    count_down : process(clk, reset_n, pipeline_uninit) is
     begin
         if reset_n = '0' then
             counter <= (others => '1');
-        elsif rising_edge(clk) then
+        elsif rising_edge(clk) and pipeline_uninit = "00" then
             counter <= counter - 1;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------------
+    -- fill_pipeline: Ensures that one extra clock cycle is used to fill the pipeline.
+    ----------------------------------------------------------------------------------
+    fill_pipeline : process(clk, counter) is
+    begin
+        if counter = C_BLOCK_SIZE - 1 then
+            pipeline_uninit <= "10";
+        elsif rising_edge(clk) then
+            pipeline_uninit <= pipeline_uninit - "01";
         end if;
     end process;
     
@@ -71,9 +83,9 @@ begin
     begin
         if reset_n = '0' then
             internal_result   <= (others => '0');
-            -- internal_addition <= (others => '0');
+            internal_addition <= (others => '0');
         elsif rising_edge(clk) then
-            -- internal_addition <= shift_left(internal_result, 1) + internal_factor_b;
+            internal_addition <= ('0' & internal_left_shift) + ("00" & internal_factor_b);  
             internal_result   <= internal_modulo;    
         end if;
     end process;
