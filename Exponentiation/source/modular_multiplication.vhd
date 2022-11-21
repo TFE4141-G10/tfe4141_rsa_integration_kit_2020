@@ -1,21 +1,14 @@
 ----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 10/03/2022 03:15:41 PM
--- Design Name: 
--- Module Name: Blakley - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
+-- File: modular_multiplication.vhd
+-- Description: Calculates the modular multiplication, result = a*b % modulus, 
+--              using the Blakley algorithm.
+--              Used in exponentiation algorithm for RSA decryption/encryption
+-- Create Date: 10/11/2022
+-- Design Name: modular_multiplication
+-- Module Name: modular_multiplication
+-- Project Name: RSA_accelerator
+-- Target Devices: PYNC-Z1
+-- Dependencies: modulo.vhd
 ----------------------------------------------------------------------------------
 
 library ieee;
@@ -44,6 +37,7 @@ architecture rtl of modular_multiplication is
     signal internal_modulo     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal counter             : unsigned(7 downto 0);
+    signal last_calculation    : std_logic;
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
@@ -54,11 +48,20 @@ begin
     result              <= internal_result;
     
     ----------------------------------------------------------------------------------
-    -- When the counter is equal to 0, it means that the calculation has iterated 
-    -- through the whole number, and the result is valid on falling edge of valid_out.
+    -- When the counter is equal to 0, it means that the last calculation is under way 
+    -- and the result is valid on rising edge of valid_out.
     ----------------------------------------------------------------------------------
-    valid_out <= '1' when counter = 0 else '0';
+    last_calculation <= '1' when counter = 0 else '0';
 
+    check_if_multiplication_done : process(last_calculation, reset_n) is
+    begin
+        if (reset_n = '0') then
+            valid_out <= '0';
+        elsif falling_edge(last_calculation) then
+            valid_out <= '1';
+        end if;
+    end process;
+    
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------

@@ -106,8 +106,6 @@ architecture rtl of rsa_accelerator is
 	signal key_n        : std_logic_vector(C_BLOCK_SIZE-1 downto 0);
 	signal rsa_status   : std_logic_vector(31 downto 0);
 
-
-    
 begin
 
 -- Instantiation of Axi Bus Interface S00_AXI
@@ -193,43 +191,40 @@ u_rsa_msgout : entity work.rsa_msgout
 		msgout_last            => msgout_last
 	);
 
+u_rsa_core : entity work.rsa_core
+	generic map (
+		C_BLOCK_SIZE => C_BLOCK_SIZE
+	)
+	port map (
+		-----------------------------------------------------------------------------
+		-- Clocks and reset
+		-----------------------------------------------------------------------------
+		clk                    => clk,
+		reset_n                => reset_n,
 
+		-----------------------------------------------------------------------------
+		-- Slave msgin interface
+		-----------------------------------------------------------------------------
+		msgin_valid            => msgin_valid,
+		msgin_ready            => msgin_ready,
+		msgin_data             => msgin_data,
+		msgin_last             => msgin_last,
 
- u_rsa_core : entity work.rsa_core
- 	generic map (
- 		C_BLOCK_SIZE => C_BLOCK_SIZE
- 	)
- 	port map (
- 		-----------------------------------------------------------------------------
- 		-- Clocks and reset
- 		-----------------------------------------------------------------------------
- 		clk                    => clk,
- 		reset_n                => reset_n,
+		-----------------------------------------------------------------------------
+		-- Master msgout interface
+		-----------------------------------------------------------------------------
+		msgout_valid           => msgout_valid,
+		msgout_ready           => msgout_ready,
+		msgout_data            => msgout_data,
+		msgout_last            => msgout_last,
 
- 		-----------------------------------------------------------------------------
- 		-- Slave msgin interface
- 		-----------------------------------------------------------------------------
- 		msgin_valid            => msgin_valid,
- 		msgin_ready            => msgin_ready,
- 		msgin_data             => msgin_data,
- 		msgin_last             => msgin_last,
+		-----------------------------------------------------------------------------
+		-- Interface to the register block
+		-----------------------------------------------------------------------------
+		key_e_d                => key_e_d,
+		key_n                  => key_n,
+		rsa_status             => rsa_status
 
- 		-----------------------------------------------------------------------------
- 		-- Master msgout interface
- 		-----------------------------------------------------------------------------
- 		msgout_valid           => msgout_valid,
- 		msgout_ready           => msgout_ready,
- 		msgout_data            => msgout_data,
- 		msgout_last            => msgout_last,
-
- 		-----------------------------------------------------------------------------
- 		-- Interface to the register block
- 		-----------------------------------------------------------------------------
- 		key_e_d                => key_e_d,
- 		key_n                  => key_n,
- 		rsa_status             => rsa_status
-
-	 	);
-	
+	);
 
 end rtl;
