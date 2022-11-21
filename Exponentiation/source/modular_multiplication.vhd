@@ -38,7 +38,7 @@ architecture rtl of modular_multiplication is
     signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
     signal counter             : unsigned(7 downto 0);
     signal last_calculation    : std_logic;
-    signal pipeline_uninit     : unsigned(1 downto 0);
+    signal pipeline_uninit     : std_logic := '1';
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
@@ -69,7 +69,7 @@ begin
     begin
         if reset_n = '0' then
             counter <= (others => '1');
-        elsif rising_edge(clk) and pipeline_uninit = "00" then
+        elsif rising_edge(clk) and pipeline_uninit = '0' then
             counter <= counter - 1;
         end if;
     end process;
@@ -77,12 +77,12 @@ begin
     ----------------------------------------------------------------------------------
     -- fill_pipeline: Ensures that one extra clock cycle is used to fill the pipeline.
     ----------------------------------------------------------------------------------
-    fill_pipeline : process(clk, counter) is
+    fill_pipeline : process(clk) is
     begin
-        if counter = C_BLOCK_SIZE - 1 then
-            pipeline_uninit <= "10";
+        if reset_n = '0' then
+            pipeline_uninit <= '1';
         elsif rising_edge(clk) then
-            pipeline_uninit <= pipeline_uninit - "01";
+            pipeline_uninit <= '0';
         end if;
     end process;
     
