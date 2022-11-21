@@ -146,9 +146,9 @@ begin
     ----------------------------------------------------------------------------------
     control_multiplication_flow : process(multiplication_done, clk, message_state) is
     begin
-        
+        if rising_edge(clk) then
         clear_multiplication_n <= '1';
-        if rising_edge(clk) and multiplication_done = '1' then
+        if multiplication_done = '1' then
             clear_multiplication_n <= '0';
             internal_result <= multiplication_result;
             if double_multiplication = '1' and double_multiplication_done = '0' then
@@ -159,6 +159,7 @@ begin
                 end if;
                 double_multiplication_done <= '0';
             end if;
+        end if;
         end if;
     end process;
     
