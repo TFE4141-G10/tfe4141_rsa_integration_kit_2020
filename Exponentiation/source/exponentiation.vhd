@@ -146,15 +146,17 @@ begin
     ----------------------------------------------------------------------------------
     control_multiplication_flow : process(multiplication_done, clk) is
     begin
-        clear_multiplication_n <= '1';
-        if rising_edge(clk) and multiplication_done = '1' then
-            clear_multiplication_n <= '0';
-            internal_result <= multiplication_result;
-            if double_multiplication = '1' and double_multiplication_done = '0' then
-                double_multiplication_done <= '1';
-            else
-                counter <= counter - 1;
-                double_multiplication_done <= '0';
+        if rising_edge(clk) then
+            clear_multiplication_n <= '1';
+            if multiplication_done = '1' then
+                clear_multiplication_n <= '0';
+                internal_result <= multiplication_result;
+                if double_multiplication = '1' and double_multiplication_done = '0' then
+                    double_multiplication_done <= '1';
+                else
+                    counter <= counter - 1;
+                    double_multiplication_done <= '0';
+                end if;
             end if;
         end if;
     end process;
