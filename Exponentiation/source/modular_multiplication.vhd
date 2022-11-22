@@ -56,17 +56,10 @@ begin
     counter_is_reset <= '1' when counter = 0 else '0';
     valid_out        <= internal_valid_out;
 
-    -- process (clk) is
-    -- begin
-    --     internal_valid_out <= '0';
-    --     if rising_edge(clk) then
-    --         if counter_is_reset = '1' and is_start = '0' then
-    --             internal_valid_out <= '1';
-    --         end if;
-    --     end if;
-    -- end process;
-
-    process (clk, reset_n) is
+    ----------------------------------------------------------------------------------
+    -- Sets internal_valid_out to '1' when counter is reset and but not on the start
+    ----------------------------------------------------------------------------------
+    set_internal_valid_out : process (clk, reset_n) is
     begin
         if reset_n = '0' then
             internal_valid_out <= '0';
@@ -77,7 +70,10 @@ begin
         end if;
     end process;
 
-    process (clk) is
+    ----------------------------------------------------------------------------------
+    -- Ensures that valid_out cannot be '1' on the start even though counter is 255
+    ----------------------------------------------------------------------------------
+    set_start_flag : process (clk) is
     begin
         if rising_edge(clk) then
             if counter_is_reset = '0' and is_start = '1' then
@@ -85,17 +81,6 @@ begin
             end if;
         end if;
     end process;
-
-    -- check_if_multiplication_done : process(clk, counter_is_reset, reset_n) is
-    -- begin
-    --     if (reset_n = '0') then
-    --         valid_out <= '0';
-    --     elsif rising_edge(clk) then
-    --         if counter_is_reset = '1' then
-    --             valid_out <= '1';
-    --         end if;
-    --     end if;
-    -- end process;
     
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
