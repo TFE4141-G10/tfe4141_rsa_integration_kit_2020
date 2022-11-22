@@ -144,7 +144,7 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(multiplication_done, clk, message_state) is
+    control_multiplication_flow : process(multiplication_done, clk) is
     begin
         if rising_edge(clk) then
         clear_multiplication_n <= '1';
@@ -174,14 +174,19 @@ begin
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(last_multiplication, result_sent_out, second_to_last_result_out) is
+    check_if_exponentiation_done : process(counter_zero, clk, last_multiplication, result_sent_out, second_to_last_result_out) is
     begin
-        if result_sent_out = '1' then
+    if result_sent_out = '1' then
             exponentiation_done <= '0';
-        elsif falling_edge(last_multiplication) then
+    elsif rising_edge(clk) then
+        if last_multiplication = '1' and counter_zero = '1' then
             exponentiation_done <= '1';
             last_result_out     <= second_to_last_result_out;
+            counter_zero <= '0';
+        elsif counter = 0 then 
+            counter_zero <= '1';
         end if;
+    end if; 
     end process;
 
     ----------------------------------------------------------------------------------
