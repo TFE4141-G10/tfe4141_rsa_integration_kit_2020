@@ -98,6 +98,7 @@ architecture rtl of exponentiation is
     -- Counter used to decide when a calculation is done
     ----------------------------------------------------------------------------------
     signal counter                    : unsigned(7 downto 0) := (others => '1'); 
+    signal counter_zero: std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
@@ -144,6 +145,7 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
+<<<<<<< HEAD
     control_multiplication_flow : process(multiplication_done, clk, message_state) is
     begin
         if rising_edge(clk) then
@@ -158,6 +160,21 @@ begin
                 counter <= counter - 1;
                 end if;
                 double_multiplication_done <= '0';
+=======
+    control_multiplication_flow : process(clk) is
+    begin
+        if rising_edge(clk) then
+            clear_multiplication_n <= '1';
+            if multiplication_done = '1' then
+                clear_multiplication_n <= '0';
+                internal_result <= multiplication_result;
+                if double_multiplication = '1' and double_multiplication_done = '0' then
+                    double_multiplication_done <= '1';
+                else
+                    counter <= counter - 1;
+                    double_multiplication_done <= '0';
+                end if;
+>>>>>>> main
             end if;
         end if;
         end if;
@@ -167,27 +184,32 @@ begin
     -- Valid result when counter wraps around to 255, and can be aquired during the
     -- whole 255 counter period. Need last_multiplication to not give valid_out in start
     ----------------------------------------------------------------------------------
-    last_multiplication <= '1' when counter = 0 else '0';
+    last_multiplication <= '1' when counter = 255 else '0';
     internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
     valid_out           <= internal_valid_out;
 
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(last_multiplication, result_sent_out, second_to_last_result_out) is
+    check_if_exponentiation_done : process(clk, result_sent_out) is
     begin
         if result_sent_out = '1' then
-            exponentiation_done <= '0';
-        elsif falling_edge(last_multiplication) then
-            exponentiation_done <= '1';
-            last_result_out     <= second_to_last_result_out;
-        end if;
+                exponentiation_done <= '0';
+        elsif rising_edge(clk) then
+            if last_multiplication = '1' and counter_zero = '1' then
+                exponentiation_done <= '1';
+                last_result_out     <= second_to_last_result_out;
+                counter_zero        <= '0';
+            elsif counter = 0 then 
+                counter_zero        <= '1';
+            end if;
+        end if; 
     end process;
 
     ----------------------------------------------------------------------------------
     -- Used to reset exponentiation done flag by indicating that the result has been sent
     ----------------------------------------------------------------------------------
-    detect_if_result_sent : process(clk, ready_out, internal_valid_out) is
+    detect_if_result_sent : process(clk) is
     begin
         result_sent_out <= '0';
         if rising_edge(clk) and ready_out = '1' and internal_valid_out = '1' then
@@ -215,7 +237,7 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, second_to_last_result_out, internal_valid_out, ready_out) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out) is
     begin
         ready_in <= '0';
         case message_state is
@@ -247,7 +269,7 @@ begin
     -- Overwrites internal message register with new message when the core is ready 
     -- to accept a new message
     ----------------------------------------------------------------------------------
-    acquire_new_message : process(clk, message_state, valid_in, message) is
+    acquire_new_message : process(clk) is
     begin
         if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
             internal_message <= message;
@@ -257,7 +279,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Sets second to last out signal so that it is ready to set the last out signal
     ----------------------------------------------------------------------------------
-    set_second_to_last_result_out : process(clk, message_state, valid_in, last_message_in) is
+    set_second_to_last_result_out : process(clk) is
     begin
         if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
             second_to_last_result_out <= last_message_in;
