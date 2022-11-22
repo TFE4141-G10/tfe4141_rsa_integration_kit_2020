@@ -148,7 +148,6 @@ begin
     control_multiplication_flow : process(multiplication_done, clk) is
     begin
         if rising_edge(clk) then
-
             clear_multiplication_n <= '1';
             if multiplication_done = '1' then
                 clear_multiplication_n <= '0';
