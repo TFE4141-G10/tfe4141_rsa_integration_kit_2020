@@ -145,7 +145,7 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(clk) is
+    control_multiplication_flow : process(clk, multiplication_result, double_multiplication, double_multiplication_done, counter) is
     begin
         if rising_edge(clk) then
             clear_multiplication_n <= '1';
@@ -173,10 +173,11 @@ begin
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(clk, result_sent_out) is
+    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
     begin
         if result_sent_out = '1' then
                 exponentiation_done <= '0';
+                last_result_out <= '0';
         elsif rising_edge(clk) then
             if last_multiplication = '1' and counter_zero = '1' then
                 exponentiation_done <= '1';
@@ -191,7 +192,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Used to reset exponentiation done flag by indicating that the result has been sent
     ----------------------------------------------------------------------------------
-    detect_if_result_sent : process(clk) is
+    detect_if_result_sent : process(clk, internal_valid_out, ready_out) is
     begin
         result_sent_out <= '0';
         if rising_edge(clk) and ready_out = '1' and internal_valid_out = '1' then
@@ -202,7 +203,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Changes message state every clock cycle
     ----------------------------------------------------------------------------------
-    change_message_state : process(clk, reset_n) is
+    change_message_state : process(clk, reset_n, next_message_state) is
     begin
         if reset_n = '0' then
             message_state <= LOAD_MESSAGE;
@@ -251,7 +252,7 @@ begin
     -- Overwrites internal message register with new message when the core is ready 
     -- to accept a new message
     ----------------------------------------------------------------------------------
-    acquire_new_message : process(clk) is
+    acquire_new_message : process(clk, valid_in, message_state, message) is
     begin
         if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
             internal_message <= message;
@@ -261,7 +262,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Sets second to last out signal so that it is ready to set the last out signal
     ----------------------------------------------------------------------------------
-    set_second_to_last_result_out : process(clk) is
+    set_second_to_last_result_out : process(clk, valid_in, message_state, last_message_in) is
     begin
         if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
             second_to_last_result_out <= last_message_in;

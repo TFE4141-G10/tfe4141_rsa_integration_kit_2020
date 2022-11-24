@@ -59,7 +59,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Sets internal_valid_out to '1' when counter is reset and but not on the start
     ----------------------------------------------------------------------------------
-    set_internal_valid_out : process (clk, reset_n) is
+    set_internal_valid_out : process (clk, reset_n, counter_is_reset, is_start) is
     begin
         if reset_n = '0' then
             internal_valid_out <= '0';
@@ -73,7 +73,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Ensures that valid_out cannot be '1' on the start even though counter is 255
     ----------------------------------------------------------------------------------
-    set_start_flag : process (clk) is
+    set_start_flag : process (clk, counter_is_reset, is_start) is
     begin
         if rising_edge(clk) then
             if counter_is_reset = '0' and is_start = '1' then
@@ -85,7 +85,7 @@ begin
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------
-    count_down : process(clk, reset_n) is
+    count_down : process(clk, reset_n, counter) is
     begin
         if reset_n = '0' then
             counter <= (others => '1');
@@ -97,7 +97,7 @@ begin
     ----------------------------------------------------------------------------------
     -- pipeline: This process defines the pipelines in the rtl.
     ----------------------------------------------------------------------------------
-    pipeline : process(clk, reset_n) is
+    pipeline : process(clk, reset_n, internal_modulo) is
     begin
         if reset_n = '0' then
             internal_result   <= (others => '0');
