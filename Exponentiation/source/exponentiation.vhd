@@ -55,9 +55,9 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     -- Signals related to message state machine
     ----------------------------------------------------------------------------------
-    type   message_state_type is (uninitialized, idle, load_new_message);
-    signal message_state              : message_state_type := uninitialized;
-    signal next_message_state         : message_state_type := uninitialized;
+    type   message_state_type is (LOAD_MESSAGE, IDLE, RESULT_READY);
+    signal message_state              : message_state_type := LOAD_MESSAGE;
+    signal next_message_state         : message_state_type := LOAD_MESSAGE;
 
     ----------------------------------------------------------------------------------
     -- Inputs and outputs of the modular multiplication core
@@ -98,6 +98,7 @@ architecture rtl of exponentiation is
     -- Counter used to decide when a calculation is done
     ----------------------------------------------------------------------------------
     signal counter                    : unsigned(7 downto 0) := (others => '1'); 
+    signal counter_zero               : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
@@ -165,21 +166,26 @@ begin
     -- Valid result when counter wraps around to 255, and can be aquired during the
     -- whole 255 counter period. Need last_multiplication to not give valid_out in start
     ----------------------------------------------------------------------------------
-    last_multiplication <= '1' when counter = 0 else '0';
+    last_multiplication <= '1' when counter = 255 else '0';
     internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
     valid_out           <= internal_valid_out;
 
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(last_multiplication, result_sent_out) is
+    check_if_exponentiation_done : process(clk, result_sent_out) is
     begin
         if result_sent_out = '1' then
-            exponentiation_done <= '0';
-        elsif falling_edge(last_multiplication) then
-            exponentiation_done <= '1';
-            last_result_out     <= second_to_last_result_out;
-        end if;
+                exponentiation_done <= '0';
+        elsif rising_edge(clk) then
+            if last_multiplication = '1' and counter_zero = '1' then
+                exponentiation_done <= '1';
+                last_result_out     <= second_to_last_result_out;
+                counter_zero        <= '0';
+            elsif counter = 0 then 
+                counter_zero        <= '1';
+            end if;
+        end if; 
     end process;
 
     ----------------------------------------------------------------------------------
@@ -199,7 +205,7 @@ begin
     change_message_state : process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            message_state <= uninitialized;
+            message_state <= LOAD_MESSAGE;
         elsif rising_edge(clk) then
             message_state <= next_message_state;
         end if;
@@ -217,27 +223,27 @@ begin
     begin
         ready_in <= '0';
         case message_state is
-            when uninitialized =>
+            when LOAD_MESSAGE =>
                 ready_in <= '1';
                 if valid_in = '1' then
-                    next_message_state <= idle;
+                    next_message_state <= IDLE;
                 else
-                    next_message_state <= uninitialized;
+                    next_message_state <= LOAD_MESSAGE;
                 end if;
-            when idle =>
+            when IDLE =>
                 if internal_valid_out = '1' then
-                    next_message_state <= load_new_message;
+                    next_message_state <= RESULT_READY;
                 else
-                    next_message_state <= idle;
+                    next_message_state <= IDLE;
                 end if;
-            when load_new_message =>
+            when RESULT_READY =>
                 if ready_out = '1' then
-                    next_message_state <= uninitialized;
+                    next_message_state <= LOAD_MESSAGE;
                 else
-                    next_message_state <= load_new_message;
+                    next_message_state <= RESULT_READY;
                 end if;
             when others =>
-                next_message_state <= idle;
+                next_message_state <= IDLE;
         end case;
     end process;
 
@@ -247,7 +253,7 @@ begin
     ----------------------------------------------------------------------------------
     acquire_new_message : process(clk) is
     begin
-        if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
+        if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
             internal_message <= message;
         end if;
     end process;
@@ -257,7 +263,7 @@ begin
     ----------------------------------------------------------------------------------
     set_second_to_last_result_out : process(clk) is
     begin
-        if rising_edge(clk) and message_state = uninitialized and valid_in = '1' then
+        if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
             second_to_last_result_out <= last_message_in;
         end if;
     end process;
