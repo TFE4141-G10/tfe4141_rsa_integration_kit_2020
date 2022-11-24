@@ -46,7 +46,9 @@ entity exponentiation is
         ------------------------------------------------------------------------------
         -- Result that is output from calculation
         ------------------------------------------------------------------------------
-		result 		    : out std_logic_vector(C_BLOCK_SIZE - 1 downto 0)	
+		result 		    : out std_logic_vector(C_BLOCK_SIZE - 1 downto 0);	
+
+        status          : out std_logic_vector(31 downto 0)
 	);
 end entity;
 
@@ -226,24 +228,28 @@ begin
         case message_state is
             when LOAD_MESSAGE =>
                 ready_in <= '1';
+                status <= (1 => '1', others => '0');
                 if valid_in = '1' then
                     next_message_state <= IDLE;
                 else
                     next_message_state <= LOAD_MESSAGE;
                 end if;
             when IDLE =>
+                status <= (2 => '1', others => '0');
                 if internal_valid_out = '1' then
                     next_message_state <= RESULT_READY;
                 else
                     next_message_state <= IDLE;
                 end if;
             when RESULT_READY =>
+                status <= (3 => '1', others => '0');
                 if ready_out = '1' then
                     next_message_state <= LOAD_MESSAGE;
                 else
                     next_message_state <= RESULT_READY;
                 end if;
             when others =>
+                status <= (0 => '1', others => '0');
                 next_message_state <= IDLE;
         end case;
     end process;

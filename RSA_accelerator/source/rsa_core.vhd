@@ -84,7 +84,7 @@ begin
 			clk             => clk         ,
 			last_message_in => msgin_last  ,
 			last_result_out => msgout_last ,
-			reset_n         => reset_n
+			reset_n         => reset_n     ,
+			status		    => rsa_status
 		);
-	rsa_status <= (others => '0'); -- Not used
 end rtl;
