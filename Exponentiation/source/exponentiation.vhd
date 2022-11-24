@@ -156,9 +156,11 @@ begin
                 internal_result <= multiplication_result;
                 if double_multiplication = '1' and double_multiplication_done = '0' then
                     double_multiplication_done <= '1';
+                    status <= (12 => '1', others => '0');
                 else
                     counter <= counter - 1;
                     double_multiplication_done <= '0';
+                    status <= (11 => '1', others => '0');
                 end if;
             end if;
         end if;
@@ -180,12 +182,15 @@ begin
         if result_sent_out = '1' then
                 exponentiation_done <= '0';
                 last_result_out <= '0';
+                status <= (8 => '1', others => '0');
         elsif rising_edge(clk) then
             if last_multiplication = '1' and counter_zero = '1' then
                 exponentiation_done <= '1';
                 last_result_out     <= second_to_last_result_out;
                 counter_zero        <= '0';
+                status <= (9 => '1', others => '0');
             elsif counter = 0 then 
+                status <= (10 => '1', others => '0');
                 counter_zero        <= '1';
             end if;
         end if; 
@@ -198,6 +203,7 @@ begin
     begin
         result_sent_out <= '0';
         if rising_edge(clk) and ready_out = '1' and internal_valid_out = '1' then
+            status <= (7 => '1', others => '0');
             result_sent_out <= '1';
         end if;
     end process;
@@ -261,6 +267,7 @@ begin
     acquire_new_message : process(clk, valid_in, message_state, message) is
     begin
         if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
+            status <= (5 => '1', others => '0');
             internal_message <= message;
         end if;
     end process;
@@ -271,6 +278,7 @@ begin
     set_second_to_last_result_out : process(clk, valid_in, message_state, last_message_in) is
     begin
         if rising_edge(clk) and message_state = LOAD_MESSAGE and valid_in = '1' then
+            status <= (6 => '1', others => '0');
             second_to_last_result_out <= last_message_in;
         end if;
     end process;
