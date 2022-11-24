@@ -17,10 +17,14 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
+library std;
+use std.textio.all;
+use std.env.finish;
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.std_logic_textio.all;
 
 entity modular_multiplication_tb is
 end entity;
@@ -38,8 +42,13 @@ architecture behavior of modular_multiplication_tb is
     signal   result       : unsigned(C_BLOCK_SIZE - 1 downto 0);
     signal   result_out   : unsigned(C_BLOCK_SIZE - 1 downto 0);
 
-    file     f_inputs     : text open read_mode is "inputs.txt";
-
+    ----------------------------------------------------------------------------------
+    -- brief: Calculates (factor_a * factor_b) mod modulus and compares it to result
+    -- param: result, from modular multiplication
+    -- param: factor_a
+    -- param: factor_b
+    -- param: modulus
+    ----------------------------------------------------------------------------------
     procedure check_result (
         result   : unsigned(C_BLOCK_SIZE - 1 downto 0); 
         factor_a : unsigned(C_BLOCK_SIZE - 1 downto 0); 
@@ -62,6 +71,9 @@ architecture behavior of modular_multiplication_tb is
             severity error;
     end procedure;
 begin
+    ----------------------------------------------------------------------------------
+    -- Instance of a modular multiplication core using the Blakley algorithm
+    ----------------------------------------------------------------------------------
     DUT : entity work.modular_multiplication
         generic map (
             C_BLOCK_SIZE => C_BLOCK_SIZE
@@ -78,6 +90,9 @@ begin
 
     clk <= not clk after T/2;
 
+    ----------------------------------------------------------------------------------
+    -- get_result: Checks if the result is valid and stores that result
+    ----------------------------------------------------------------------------------
     get_result : process(clk) is
     begin
         if rising_edge(clk) then
@@ -89,26 +104,41 @@ begin
         end if;
     end process;
 
-    process is
+    ----------------------------------------------------------------------------------
+    -- set_stimuli_from_file: Reads the stimuli from a file and sets the signals. The
+    -- result is checked after a valid result is received
+    ----------------------------------------------------------------------------------
+    set_stimuli_from_file : process is
+        file     f_inputs   : text;
+        variable f_line     : line;
+        variable f_factor_a : unsigned(C_BLOCK_SIZE - 1 downto 0);
+        variable f_factor_b : unsigned(C_BLOCK_SIZE - 1 downto 0);
+        variable f_modulus  : unsigned(C_BLOCK_SIZE - 1 downto 0);
     begin
-        
-    end process;
+        file_open(f_inputs, "C:\Users\espen\Repositories\TFE4141\tfe4141_rsa_integration_kit_2020\Exponentiation\testbench\inputs.txt", read_mode);
 
-    set_stimuli : process is
-    begin
-        -- factor_a <= 0x"85ee722363960779206a2b37cc8b64b5fc12a934473fa0204bbaaf714bc90c01";
-        -- factor_b <= 0x"08f9baf32e8505cbc9a28fed4d5791dce46508c3d1636232bf91f5d0b6632a9f";
-        -- modulus  <= 0x"0000000000000000000000000000000000000000000000000000000000010001";
-        -- answer <= (0x"85ee722363960779206a2b37cc8b64b5fc12a934473fa0204bbaaf714bc90c01" * 0x"08f9baf32e8505cbc9a28fed4d5791dce46508c3d1636232bf91f5d0b6632a9f") mod 0x"0000000000000000000000000000000000000000000000000000000000010001";
-        factor_a <= to_unsigned(9, C_BLOCK_SIZE);
-        factor_b <= to_unsigned(9, C_BLOCK_SIZE);
-        modulus  <= to_unsigned(55, C_BLOCK_SIZE);
+        readline(f_inputs, f_line);
+        read(f_line, f_modulus);
+        readline(f_inputs, f_line); -- skip empty line
 
-        wait until valid_out = '1';
-        wait until valid_out = '0';
-        check_result(result_out, factor_a, factor_b, modulus);
+        modulus <= f_modulus;
+
+        while not endfile(f_inputs) loop
+            readline(f_inputs, f_line);
+            read(f_line, f_factor_a);
+            readline(f_inputs, f_line);
+            read(f_line, f_factor_b);
+            readline(f_inputs, f_line); -- skip empty line
+
+            factor_a <= f_factor_a;
+            factor_b <= f_factor_b;
+
+            wait until valid_out = '1';
+            wait until valid_out = '0';
+            check_result(result_out, factor_a, factor_b, modulus);
+        end loop;
 
         file_close(f_inputs);
-        wait;
+        finish;
     end process;
 end architecture;
