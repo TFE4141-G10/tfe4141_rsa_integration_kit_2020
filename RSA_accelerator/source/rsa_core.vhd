@@ -23,7 +23,7 @@ entity rsa_core is
 	generic (
 		-- Users to add parameters here
 		C_BLOCK_SIZE           : integer := 256;
-		N : integer := 15
+		N : integer := 1
 	);
 	port (
 		-----------------------------------------------------------------------------
@@ -149,96 +149,26 @@ end generate;
 
 msgout_data <= msgout_data_array(0) when msgout_select_vector(0) = '1' else
 msgout_data_array(1) when msgout_select_vector(1) = '1' else
-msgout_data_array(2) when msgout_select_vector(2) = '1' else
-msgout_data_array(3) when msgout_select_vector(3) = '1' else
-msgout_data_array(4) when msgout_select_vector(4) = '1' else
-msgout_data_array(5) when msgout_select_vector(5) = '1' else
-msgout_data_array(6) when msgout_select_vector(6) = '1' else
-msgout_data_array(7) when msgout_select_vector(7) = '1' else
-msgout_data_array(8) when msgout_select_vector(8) = '1' else
-msgout_data_array(9) when msgout_select_vector(9) = '1' else
-msgout_data_array(10) when msgout_select_vector(10) = '1' else
-msgout_data_array(11) when msgout_select_vector(11) = '1' else
-msgout_data_array(12) when msgout_select_vector(12) = '1' else
-msgout_data_array(13) when msgout_select_vector(13) = '1' else
-msgout_data_array(14) when msgout_select_vector(14) = '1' else
-msgout_data_array(15) when msgout_select_vector(15) = '1' else
 (others => '0');
 
 
 rsa_status <= rsa_status_array(0) when msgout_select_vector(0) = '1' else
 rsa_status_array(1) when msgout_select_vector(1) = '1' else
-rsa_status_array(2) when msgout_select_vector(2) = '1' else
-rsa_status_array(3) when msgout_select_vector(3) = '1' else
-rsa_status_array(4) when msgout_select_vector(4) = '1' else
-rsa_status_array(5) when msgout_select_vector(5) = '1' else
-rsa_status_array(6) when msgout_select_vector(6) = '1' else
-rsa_status_array(7) when msgout_select_vector(7) = '1' else
-rsa_status_array(8) when msgout_select_vector(8) = '1' else
-rsa_status_array(9) when msgout_select_vector(9) = '1' else
-rsa_status_array(10) when msgout_select_vector(10) = '1' else
-rsa_status_array(11) when msgout_select_vector(11) = '1' else
-rsa_status_array(12) when msgout_select_vector(12) = '1' else
-rsa_status_array(13) when msgout_select_vector(13) = '1' else
-rsa_status_array(14) when msgout_select_vector(14) = '1' else
-rsa_status_array(15) when msgout_select_vector(15) = '1' else
 (others => '0');
 
 
 msgout_last <= msgout_last_vector(0) when msgout_select_vector(0) = '1' else
 msgout_last_vector(1) when msgout_select_vector(1) = '1' else
-msgout_last_vector(2) when msgout_select_vector(2) = '1' else
-msgout_last_vector(3) when msgout_select_vector(3) = '1' else
-msgout_last_vector(4) when msgout_select_vector(4) = '1' else
-msgout_last_vector(5) when msgout_select_vector(5) = '1' else
-msgout_last_vector(6) when msgout_select_vector(6) = '1' else
-msgout_last_vector(7) when msgout_select_vector(7) = '1' else
-msgout_last_vector(8) when msgout_select_vector(8) = '1' else
-msgout_last_vector(9) when msgout_select_vector(9) = '1' else
-msgout_last_vector(10) when msgout_select_vector(10) = '1' else
-msgout_last_vector(11) when msgout_select_vector(11) = '1' else
-msgout_last_vector(12) when msgout_select_vector(12) = '1' else
-msgout_last_vector(13) when msgout_select_vector(13) = '1' else
-msgout_last_vector(14) when msgout_select_vector(14) = '1' else
-msgout_last_vector(15) when msgout_select_vector(15) = '1' else
 '0';
 
 
 msgin_ready <= msgin_ready_vector(0) when msgin_select_vector(0) = '1' else
 msgin_ready_vector(1) when msgin_select_vector(1) = '1' else
-msgin_ready_vector(2) when msgin_select_vector(2) = '1' else
-msgin_ready_vector(3) when msgin_select_vector(3) = '1' else
-msgin_ready_vector(4) when msgin_select_vector(4) = '1' else
-msgin_ready_vector(5) when msgin_select_vector(5) = '1' else
-msgin_ready_vector(6) when msgin_select_vector(6) = '1' else
-msgin_ready_vector(7) when msgin_select_vector(7) = '1' else
-msgin_ready_vector(8) when msgin_select_vector(8) = '1' else
-msgin_ready_vector(9) when msgin_select_vector(9) = '1' else
-msgin_ready_vector(10) when msgin_select_vector(10) = '1' else
-msgin_ready_vector(11) when msgin_select_vector(11) = '1' else
-msgin_ready_vector(12) when msgin_select_vector(12) = '1' else
-msgin_ready_vector(13) when msgin_select_vector(13) = '1' else
-msgin_ready_vector(14) when msgin_select_vector(14) = '1' else
-msgin_ready_vector(15) when msgin_select_vector(15) = '1' else
 '0';
 
 
 msgout_valid <= msgout_valid_vector(0) when msgout_select_vector(0) = '1' else
 msgout_valid_vector(1) when msgout_select_vector(1) = '1' else
-msgout_valid_vector(2) when msgout_select_vector(2) = '1' else
-msgout_valid_vector(3) when msgout_select_vector(3) = '1' else
-msgout_valid_vector(4) when msgout_select_vector(4) = '1' else
-msgout_valid_vector(5) when msgout_select_vector(5) = '1' else
-msgout_valid_vector(6) when msgout_select_vector(6) = '1' else
-msgout_valid_vector(7) when msgout_select_vector(7) = '1' else
-msgout_valid_vector(8) when msgout_select_vector(8) = '1' else
-msgout_valid_vector(9) when msgout_select_vector(9) = '1' else
-msgout_valid_vector(10) when msgout_select_vector(10) = '1' else
-msgout_valid_vector(11) when msgout_select_vector(11) = '1' else
-msgout_valid_vector(12) when msgout_select_vector(12) = '1' else
-msgout_valid_vector(13) when msgout_select_vector(13) = '1' else
-msgout_valid_vector(14) when msgout_select_vector(14) = '1' else
-msgout_valid_vector(15) when msgout_select_vector(15) = '1' else
 '0';
 
 

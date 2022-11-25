@@ -228,10 +228,11 @@ begin
         ready_in        <= '0';
         valid_out       <= '0';
         last_result_out <= '0';
+        ready_in <= '0';
         case message_state is
             when LOAD_MESSAGE =>
-                ready_in <= '1';
                 if valid_in = '1' then
+                    ready_in <= '1';
                     status_16 <= (0 => '1', others => '0');
                     next_message_state <= IDLE;
                 else
