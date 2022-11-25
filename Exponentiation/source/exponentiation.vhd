@@ -73,6 +73,7 @@ architecture rtl of exponentiation is
     -- Maps to result. Used for creating register for the result
     ----------------------------------------------------------------------------------
     signal internal_result            : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal internal_result2            : std_logic_vector(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
 
     ----------------------------------------------------------------------------------
     -- Signals related to the calculations themself
@@ -223,11 +224,12 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in, internal_result) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in, internal_result2) is
     begin
         ready_in        <= '0';
         valid_out       <= '0';
         last_result_out <= '0';
+        result <= (others => '0');
         case message_state is
             when LOAD_MESSAGE =>
                 ready_in <= '1';
@@ -243,7 +245,7 @@ begin
                     status_16 <= (2 => '1', others => '0');
                     valid_out          <= '1';
                     last_result_out    <= internal_last_message_in;
-                    result <= internal_result;
+                    result <= internal_result2;
                     next_message_state <= LOAD_MESSAGE;
                 else
                     status_16 <= (3 => '1', others => '0');
@@ -252,6 +254,7 @@ begin
             when others => -- IDLE
                 if internal_valid_out = '1' then
                     status_16 <= (4 => '1', others => '0');
+                    internal_result2 <= internal_result;
                     next_message_state <= RESULT_READY;
                 else
                     status_16 <= (5 => '1', others => '0');
