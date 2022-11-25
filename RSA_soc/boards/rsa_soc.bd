@@ -187,10 +187,10 @@
           }
         },
         "interface_nets": {
-          "ps7_0_axi_periph_M00_AXI": {
+          "rsa_accelerator_0_m00_axis": {
             "interface_ports": [
-              "S_AXI_LITE",
-              "rsa_dma/S_AXI_LITE"
+              "rsa_acc/m00_axis",
+              "rsa_dma/S_AXIS_S2MM"
             ]
           },
           "axi_dma_0_M_AXI_S2MM": {
@@ -199,10 +199,10 @@
               "rsa_dma/M_AXI_S2MM"
             ]
           },
-          "rsa_accelerator_0_m00_axis": {
+          "ps7_0_axi_periph_M00_AXI": {
             "interface_ports": [
-              "rsa_acc/m00_axis",
-              "rsa_dma/S_AXIS_S2MM"
+              "S_AXI_LITE",
+              "rsa_dma/S_AXI_LITE"
             ]
           },
           "axi_dma_0_M_AXI_MM2S": {
@@ -2311,12 +2311,6 @@
           }
         },
         "interface_nets": {
-          "ps7_0_axi_periph_to_s00_couplers": {
-            "interface_ports": [
-              "S00_AXI",
-              "s00_couplers/S_AXI"
-            ]
-          },
           "m00_couplers_to_ps7_0_axi_periph": {
             "interface_ports": [
               "M00_AXI",
@@ -2345,6 +2339,12 @@
             "interface_ports": [
               "xbar/M01_AXI",
               "m01_couplers/S_AXI"
+            ]
+          },
+          "ps7_0_axi_periph_to_s00_couplers": {
+            "interface_ports": [
+              "S00_AXI",
+              "s00_couplers/S_AXI"
             ]
           }
         },
@@ -2407,18 +2407,6 @@
       }
     },
     "interface_nets": {
-      "processing_system7_0_FIXED_IO": {
-        "interface_ports": [
-          "FIXED_IO",
-          "processing_system7_0/FIXED_IO"
-        ]
-      },
-      "processing_system7_0_M_AXI_GP0": {
-        "interface_ports": [
-          "processing_system7_0/M_AXI_GP0",
-          "ps7_0_axi_periph/S00_AXI"
-        ]
-      },
       "axi_dma_0_M_AXI_S2MM": {
         "interface_ports": [
           "rsa/M_AXI_S2MM",
@@ -2435,6 +2423,18 @@
         "interface_ports": [
           "ps7_0_axi_periph/M00_AXI",
           "rsa/S_AXI_LITE"
+        ]
+      },
+      "processing_system7_0_FIXED_IO": {
+        "interface_ports": [
+          "FIXED_IO",
+          "processing_system7_0/FIXED_IO"
+        ]
+      },
+      "processing_system7_0_M_AXI_GP0": {
+        "interface_ports": [
+          "processing_system7_0/M_AXI_GP0",
+          "ps7_0_axi_periph/S00_AXI"
         ]
       },
       "ps7_0_axi_periph_M01_AXI": {

@@ -21,22 +21,22 @@ entity exponentiation is
 	);
 	port (
 		clk 		    : in  std_logic;
-		reset_n 	    : in  std_logic := '1';
+		reset_n 	    : in  std_logic;
 		------------------------------------------------------------------------------
         -- Controls messages into core
         ------------------------------------------------------------------------------
 		valid_in	    : in  std_logic;
-		ready_in	    : out std_logic := '1';
+		ready_in	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls results out of core
         ------------------------------------------------------------------------------
 		ready_out	    : in  std_logic;
-		valid_out	    : out std_logic := '0';
+		valid_out	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls what happens if there is nothing more to calculate
         ------------------------------------------------------------------------------
 		last_message_in : in std_logic;
-		last_result_out : out std_logic := '0';
+		last_result_out : out std_logic;
 		------------------------------------------------------------------------------
         -- Data input that is used for calculations
         ------------------------------------------------------------------------------
@@ -80,7 +80,6 @@ architecture rtl of exponentiation is
     signal exponentiation_done        : std_logic := '0';
     signal multiplication_done        : std_logic := '0';
     signal clear_multiplication_n     : std_logic := '0';
-    signal double_multiplication      : std_logic := '1';
     signal double_multiplication_done : std_logic := '0';
     signal last_multiplication        : std_logic := '0';
 
@@ -88,8 +87,7 @@ architecture rtl of exponentiation is
     -- Used to control the flow of messages in and results out of the core
     ----------------------------------------------------------------------------------
     signal result_sent_out            : std_logic := '0';
-    signal second_to_last_result_out  : std_logic := '0';
-    signal internal_last              : std_logic := '0';
+    signal internal_last_message_in   : std_logic := '0';
 
     ----------------------------------------------------------------------------------
     -- Mappings of ports to make readable and writable
@@ -138,14 +136,9 @@ begin
                        std_logic_vector(to_unsigned(1, 256)); 
 
     ----------------------------------------------------------------------------------
-    -- Desides whether to calculate a single or double multiplication
-    ----------------------------------------------------------------------------------
-    double_multiplication <= '1' when key(to_integer(counter)) = '1' else '0';
-
-    ----------------------------------------------------------------------------------
     -- Result changes when internal result changes on the rising edge of the clock
     ----------------------------------------------------------------------------------
-    result <= internal_result;
+    
 
     ----------------------------------------------------------------------------------
     -- Process for the double multiplication. It has two states:
@@ -154,14 +147,14 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(clk, multiplication_result, double_multiplication, double_multiplication_done, counter) is
+    control_multiplication_flow : process(clk, multiplication_result, key, double_multiplication_done, counter) is
     begin
         if rising_edge(clk) then
             clear_multiplication_n <= '1';
             if multiplication_done = '1' then
                 clear_multiplication_n <= '0';
                 internal_result <= multiplication_result;
-                if double_multiplication = '1' and double_multiplication_done = '0' then
+                if key(to_integer(counter)) = '1' and double_multiplication_done = '0' then
                     status_32 <= (0 => '1', others => '0');
                     double_multiplication_done <= '1';
                 else
@@ -179,12 +172,11 @@ begin
     ----------------------------------------------------------------------------------
     last_multiplication <= '1' when counter = 255 else '0';
     internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
-    
 
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
+    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, counter) is
     begin
         if result_sent_out = '1' then
             exponentiation_done <= '0';
@@ -231,45 +223,38 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in, internal_result) is
     begin
-        ready_in <= '0';
+        ready_in        <= '0';
+        valid_out       <= '0';
+        last_result_out <= '0';
         case message_state is
             when LOAD_MESSAGE =>
                 ready_in <= '1';
                 if valid_in = '1' then
                     status_16 <= (0 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= IDLE;
                 else
                     status_16 <= (1 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= LOAD_MESSAGE;
                 end if;
             when RESULT_READY =>
                 if ready_out = '1' then
                     status_16 <= (2 => '1', others => '0');
-                    last_result_out     <= internal_last;
-                    valid_out           <= '1';
+                    valid_out          <= '1';
+                    last_result_out    <= internal_last_message_in;
+                    result <= internal_result;
                     next_message_state <= LOAD_MESSAGE;
                 else
                     status_16 <= (3 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= RESULT_READY;
                 end if;
             when others => -- IDLE
                 if internal_valid_out = '1' then
                     status_16 <= (4 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= RESULT_READY;
                 else
                     status_16 <= (5 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= IDLE;
                 end if;
         end case;
@@ -279,12 +264,15 @@ begin
     -- Overwrites internal message register with new message when the core is ready 
     -- to accept a new message
     ----------------------------------------------------------------------------------
-    acquire_new_message : process(clk, valid_in, message_state, message, last_message_in) is
+    acquire_new_message : process(clk, valid_in, message_state, message, last_message_in, reset_n) is
     begin
-        if rising_edge(clk) then
+        if reset_n = '0' then
+            internal_message         <= (others => '0');
+            internal_last_message_in <= '0';
+        elsif rising_edge(clk) then
             if message_state = LOAD_MESSAGE and valid_in = '1' then
-                internal_message <= message;
-                internal_last <= last_message_in;
+                internal_message         <= message;
+                internal_last_message_in <= last_message_in;
             end if;
         end if;
     end process;

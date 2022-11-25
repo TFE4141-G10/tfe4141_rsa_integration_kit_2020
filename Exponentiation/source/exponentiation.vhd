@@ -138,7 +138,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Result changes when internal result changes on the rising edge of the clock
     ----------------------------------------------------------------------------------
-    result <= internal_result;
+    
 
     ----------------------------------------------------------------------------------
     -- Process for the double multiplication. It has two states:
@@ -223,7 +223,7 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in, internal_result) is
     begin
         ready_in        <= '0';
         valid_out       <= '0';
@@ -243,6 +243,7 @@ begin
                     status_16 <= (2 => '1', others => '0');
                     valid_out          <= '1';
                     last_result_out    <= internal_last_message_in;
+                    result <= internal_result;
                     next_message_state <= LOAD_MESSAGE;
                 else
                     status_16 <= (3 => '1', others => '0');
@@ -263,9 +264,12 @@ begin
     -- Overwrites internal message register with new message when the core is ready 
     -- to accept a new message
     ----------------------------------------------------------------------------------
-    acquire_new_message : process(clk, valid_in, message_state, message, last_message_in) is
+    acquire_new_message : process(clk, valid_in, message_state, message, last_message_in, reset_n) is
     begin
-        if rising_edge(clk) then
+        if reset_n = '0' then
+            internal_message         <= (others => '0');
+            internal_last_message_in <= '0';
+        elsif rising_edge(clk) then
             if message_state = LOAD_MESSAGE and valid_in = '1' then
                 internal_message         <= message;
                 internal_last_message_in <= last_message_in;
