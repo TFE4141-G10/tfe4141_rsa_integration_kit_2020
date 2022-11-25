@@ -100,13 +100,7 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     signal counter                    : unsigned(7 downto 0) := (others => '1'); 
     signal counter_zero               : std_logic := '0';
-
-    signal status_8                   : std_logic_vector(7 downto 0) := (others => '0');
-    signal status_16                  : std_logic_vector(7 downto 0) := (others => '0');
-    signal status_32                  : std_logic_vector(15 downto 0) := (others => '0');
 begin
-    status_8 <= last_message_in & ready_out & valid_in & reset_n & result_sent_out & last_multiplication & exponentiation_done & multiplication_done; 
-    status <= status_32 & status_16 & status_8;
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
     -- Blakley algorithm
@@ -155,10 +149,8 @@ begin
                 clear_multiplication_n <= '0';
                 internal_result <= multiplication_result;
                 if key(to_integer(counter)) = '1' and double_multiplication_done = '0' then
-                    status_32 <= (0 => '1', others => '0');
                     double_multiplication_done <= '1';
                 else
-                    status_32 <= (1 => '1', others => '0');
                     counter <= counter - 1;
                     double_multiplication_done <= '0';
                 end if;
@@ -232,28 +224,22 @@ begin
             when LOAD_MESSAGE =>
                 ready_in <= '1';
                 if valid_in = '1' then
-                    status_16 <= (0 => '1', others => '0');
                     next_message_state <= IDLE;
                 else
-                    status_16 <= (1 => '1', others => '0');
                     next_message_state <= LOAD_MESSAGE;
                 end if;
             when RESULT_READY =>
                 if ready_out = '1' then
-                    status_16 <= (2 => '1', others => '0');
                     valid_out          <= '1';
                     last_result_out    <= internal_last_message_in;
                     next_message_state <= LOAD_MESSAGE;
                 else
-                    status_16 <= (3 => '1', others => '0');
                     next_message_state <= RESULT_READY;
                 end if;
             when others => -- IDLE
                 if internal_valid_out = '1' then
-                    status_16 <= (4 => '1', others => '0');
                     next_message_state <= RESULT_READY;
                 else
-                    status_16 <= (5 => '1', others => '0');
                     next_message_state <= IDLE;
                 end if;
         end case;
@@ -272,16 +258,4 @@ begin
             end if;
         end if;
     end process;
-
-    ----------------------------------------------------------------------------------
-    -- Sets second to last out signal so that it is ready to set the last out signal
-    ----------------------------------------------------------------------------------
---    set_second_to_last_result_out : process(clk, valid_in, message_state, last_message_in) is
---    begin
---        if rising_edge(clk)  then
---            if message_state = LOAD_MESSAGE and valid_in = '1' then
---                second_to_last_result_out <= last_message_in;
---            end if;
---        end if;
---    end process;
 end architecture;
