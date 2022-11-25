@@ -102,11 +102,12 @@ architecture rtl of exponentiation is
     signal counter                    : unsigned(7 downto 0) := (others => '1'); 
     signal counter_zero               : std_logic := '0';
 
-
-    signal status_16                  : std_logic_vector(15 downto 0) := (others => '0');
+    signal status_8                   : std_logic_vector(7 downto 0) := (others => '0');
+    signal status_16                  : std_logic_vector(7 downto 0) := (others => '0');
     signal status_32                  : std_logic_vector(15 downto 0) := (others => '0');
 begin
-    status <= status_32 & status_16;
+    status_8 <= last_message_in & ready_out & valid_in & reset_n & result_sent_out & last_multiplication & exponentiation_done & multiplication_done; 
+    status <= status_32 & status_16 & status_8;
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
     -- Blakley algorithm
