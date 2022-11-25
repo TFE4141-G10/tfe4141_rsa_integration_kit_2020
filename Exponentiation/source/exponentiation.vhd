@@ -88,12 +88,12 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     signal result_sent_out            : std_logic := '0';
     signal internal_last_message_in   : std_logic := '0';
+    signal valid_result               : std_logic := '0';
 
     ----------------------------------------------------------------------------------
     -- Mappings of ports to make readable and writable
     ----------------------------------------------------------------------------------
     signal internal_message           : std_logic_vector(255 downto 0);
-    signal internal_valid_out         : std_logic := '0';
 
     ----------------------------------------------------------------------------------
     -- Counter used to decide when a calculation is done
@@ -163,7 +163,7 @@ begin
     -- whole 255 counter period. Need last_multiplication to not give valid_out in start
     ----------------------------------------------------------------------------------
     last_multiplication <= '1' when counter = 255 else '0';
-    internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
+    valid_result        <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
 
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
@@ -185,11 +185,11 @@ begin
     ----------------------------------------------------------------------------------
     -- Used to reset exponentiation done flag by indicating that the result has been sent
     ----------------------------------------------------------------------------------
-    detect_if_result_sent : process(clk, internal_valid_out, ready_out) is
+    detect_if_result_sent : process(clk, valid_result, ready_out) is
     begin
         result_sent_out <= '0';
         if rising_edge(clk) then
-            if ready_out = '1' and internal_valid_out = '1' then
+            if ready_out = '1' and valid_result = '1' then
                 result_sent_out <= '1';
             end if;
         end if;
@@ -215,7 +215,7 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in) is
+    message_state_machine : process(message_state, valid_in, valid_result, ready_out, internal_last_message_in) is
     begin
         ready_in        <= '0';
         valid_out       <= '0';
@@ -237,7 +237,7 @@ begin
                     next_message_state <= RESULT_READY;
                 end if;
             when others => -- IDLE
-                if internal_valid_out = '1' then
+                if valid_result = '1' then
                     next_message_state <= RESULT_READY;
                 else
                     next_message_state <= IDLE;
