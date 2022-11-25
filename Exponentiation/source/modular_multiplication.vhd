@@ -31,22 +31,23 @@ entity modular_multiplication is
 end entity;
 
 architecture rtl of modular_multiplication is
-    signal internal_factor_b   : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
-    signal internal_left_shift : unsigned(C_BLOCK_SIZE - 0 downto 0) := (others => '0'); -- 1 bit wider because of left shift
-    signal internal_addition   : unsigned(C_BLOCK_SIZE + 1 downto 0) := (others => '0'); -- 2 bits wider because of addition
-    signal internal_modulo     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
-    signal internal_result     : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
-    signal counter             : unsigned(7 downto 0);
-    signal counter_is_reset    : std_logic;
-    signal internal_valid_out  : std_logic;
-    signal is_start            : std_logic := '1';
+    signal internal_factor_b      : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal internal_left_shift    : unsigned(C_BLOCK_SIZE - 0 downto 0) := (others => '0'); -- 1 bit wider because of left shift
+    signal internal_addition      : unsigned(C_BLOCK_SIZE + 1 downto 0) := (others => '0'); -- 2 bits wider because of addition
+    signal internal_modulo        : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal internal_result        : unsigned(C_BLOCK_SIZE - 1 downto 0) := (others => '0');
+    signal counter                : unsigned(8 downto 0);
+    signal counter_is_reset       : std_logic := '0';
+    signal internal_valid_out     : std_logic := '0';
+    signal is_start               : std_logic := '1';
+    signal pipeline_uninitialized : std_logic := '1';
+    signal pipe_select            : std_logic := '0';
 begin
     ----------------------------------------------------------------------------------
     -- Internal calculations for the modular multiplication
     ----------------------------------------------------------------------------------
-    internal_factor_b   <= factor_b when factor_a(to_integer(counter)) = '1' else (others => '0');
+    internal_factor_b   <= factor_b when factor_a(to_integer(counter(8 downto 1))) = '1' else (others => '0');
     internal_left_shift <= internal_result & '0'; -- left shift by 1 bit
-    internal_addition   <= ('0' & internal_left_shift) + ("00" & internal_factor_b);    
     result              <= internal_result;
     
     ----------------------------------------------------------------------------------
@@ -85,26 +86,48 @@ begin
     ----------------------------------------------------------------------------------
     -- count_down: This process decrements the counter by 1 every clock cycle.
     ----------------------------------------------------------------------------------
-    count_down : process(clk, reset_n, counter) is
+    count_down : process(clk, reset_n) is
     begin
         if reset_n = '0' then
-            counter <= (others => '1');
-        elsif rising_edge(clk) then
+            counter <= (0 => '0', others => '1');
+        elsif rising_edge(clk) and pipeline_uninitialized = '0' then
             counter <= counter - 1;
+        end if;
+    end process;
+
+    ----------------------------------------------------------------------------------
+    -- fill_pipeline: Ensures that one extra clock cycle is used to fill the pipeline.
+    ----------------------------------------------------------------------------------
+    fill_pipeline : process(clk, reset_n) is
+    begin
+        if reset_n = '0' then
+            pipeline_uninitialized <= '1';
+        elsif rising_edge(clk) then
+            pipeline_uninitialized <= '0';
         end if;
     end process;
     
     ----------------------------------------------------------------------------------
     -- pipeline: This process defines the pipelines in the rtl.
     ----------------------------------------------------------------------------------
-    pipeline : process(clk, reset_n, internal_modulo) is
+
+    pipeline : process(clk, reset_n) is
     begin
         if reset_n = '0' then
+            internal_addition <= (others => '0');
             internal_result   <= (others => '0');
-            -- internal_addition <= (others => '0');
+            pipe_select       <= '0';
         elsif rising_edge(clk) then
-            -- internal_addition <= shift_left(internal_result, 1) + internal_factor_b;
-            internal_result   <= internal_modulo;    
+            case pipe_select is
+                when '0' => 
+                    internal_addition <= ('0' & internal_left_shift) + ("00" & internal_factor_b); 
+                    pipe_select       <= '1';
+                when '1' => 
+                    internal_result   <= internal_modulo; 
+                    pipe_select       <= '0';
+                when others => 
+                    null;
+            end case;
         end if;
     end process;
     
