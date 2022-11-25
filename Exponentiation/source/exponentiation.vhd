@@ -238,7 +238,7 @@ begin
             when UNINITIALIZED =>
                 ready_in <= '0';
                 if valid_in = '1' then
-                    next_message_state <= UNINITIALIZED;
+                    next_message_state <= LOAD_MESSAGE;
                     status_16 <= (6 => '1', others => '0');
                 else
                     next_message_state <= UNINITIALIZED;
