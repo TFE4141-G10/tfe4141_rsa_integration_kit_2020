@@ -80,7 +80,6 @@ architecture rtl of exponentiation is
     signal exponentiation_done        : std_logic := '0';
     signal multiplication_done        : std_logic := '0';
     signal clear_multiplication_n     : std_logic := '0';
-    signal double_multiplication      : std_logic := '1';
     signal double_multiplication_done : std_logic := '0';
     signal last_multiplication        : std_logic := '0';
 
@@ -137,11 +136,6 @@ begin
                        std_logic_vector(to_unsigned(1, 256)); 
 
     ----------------------------------------------------------------------------------
-    -- Desides whether to calculate a single or double multiplication
-    ----------------------------------------------------------------------------------
-    double_multiplication <= key(to_integer(counter));
-
-    ----------------------------------------------------------------------------------
     -- Result changes when internal result changes on the rising edge of the clock
     ----------------------------------------------------------------------------------
     result <= internal_result;
@@ -153,14 +147,14 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(clk, multiplication_result, double_multiplication, double_multiplication_done, counter) is
+    control_multiplication_flow : process(clk, multiplication_result, key, double_multiplication_done, counter) is
     begin
         if rising_edge(clk) then
             clear_multiplication_n <= '1';
             if multiplication_done = '1' then
                 clear_multiplication_n <= '0';
                 internal_result <= multiplication_result;
-                if double_multiplication = '1' and double_multiplication_done = '0' then
+                if key(to_integer(counter)) = '1' and double_multiplication_done = '0' then
                     status_32 <= (0 => '1', others => '0');
                     double_multiplication_done <= '1';
                 else
@@ -178,7 +172,6 @@ begin
     ----------------------------------------------------------------------------------
     last_multiplication <= '1' when counter = 255 else '0';
     internal_valid_out  <= '1' when exponentiation_done = '1' and result_sent_out = '0' else '0';
-    
 
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
