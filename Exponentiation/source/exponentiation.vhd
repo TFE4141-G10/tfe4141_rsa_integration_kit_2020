@@ -88,8 +88,7 @@ architecture rtl of exponentiation is
     -- Used to control the flow of messages in and results out of the core
     ----------------------------------------------------------------------------------
     signal result_sent_out            : std_logic := '0';
-    signal second_to_last_result_out  : std_logic := '0';
-    signal internal_last              : std_logic := '0';
+    signal internal_last_message_in   : std_logic := '0';
 
     ----------------------------------------------------------------------------------
     -- Mappings of ports to make readable and writable
@@ -140,7 +139,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Desides whether to calculate a single or double multiplication
     ----------------------------------------------------------------------------------
-    double_multiplication <= '1' when key(to_integer(counter)) = '1' else '0';
+    double_multiplication <= key(to_integer(counter));
 
     ----------------------------------------------------------------------------------
     -- Result changes when internal result changes on the rising edge of the clock
@@ -184,7 +183,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
+    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, counter) is
     begin
         if result_sent_out = '1' then
             exponentiation_done <= '0';
@@ -231,45 +230,37 @@ begin
     --    a new message
     -- 3. Load new message: Used when the core is ready to accept a new message
     ----------------------------------------------------------------------------------
-    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out) is
+    message_state_machine : process(message_state, valid_in, internal_valid_out, ready_out, internal_last_message_in) is
     begin
-        ready_in <= '0';
+        ready_in        <= '0';
+        valid_out       <= '0';
+        last_result_out <= '0';
         case message_state is
             when LOAD_MESSAGE =>
                 ready_in <= '1';
                 if valid_in = '1' then
                     status_16 <= (0 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= IDLE;
                 else
                     status_16 <= (1 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= LOAD_MESSAGE;
                 end if;
             when RESULT_READY =>
                 if ready_out = '1' then
                     status_16 <= (2 => '1', others => '0');
-                    last_result_out     <= internal_last;
-                    valid_out           <= '1';
+                    valid_out          <= '1';
+                    last_result_out    <= internal_last_message_in;
                     next_message_state <= LOAD_MESSAGE;
                 else
                     status_16 <= (3 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= RESULT_READY;
                 end if;
             when others => -- IDLE
                 if internal_valid_out = '1' then
                     status_16 <= (4 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= RESULT_READY;
                 else
                     status_16 <= (5 => '1', others => '0');
-                    last_result_out     <= '0';
-                    valid_out           <= '0';
                     next_message_state <= IDLE;
                 end if;
         end case;
@@ -283,8 +274,8 @@ begin
     begin
         if rising_edge(clk) then
             if message_state = LOAD_MESSAGE and valid_in = '1' then
-                internal_message <= message;
-                internal_last <= last_message_in;
+                internal_message         <= message;
+                internal_last_message_in <= last_message_in;
             end if;
         end if;
     end process;
