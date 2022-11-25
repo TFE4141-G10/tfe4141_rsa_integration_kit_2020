@@ -28,8 +28,7 @@ architecture rtl of modulo is
     signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0); -- need to match signal lengths
 begin
     result          <= internal_result(C_BLOCK_SIZE - 1 downto 0);
-    internal_result <= numerator - (modulus & "00")       when numerator >= (modulus & "00")      else
-                       numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else
+    internal_result <= numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else
                        numerator - modulus                when numerator >= ("00" & modulus)      else
                        numerator;
 end architecture;
