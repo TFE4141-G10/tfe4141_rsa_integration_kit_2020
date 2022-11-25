@@ -121,7 +121,8 @@ begin
             factor_b                 => unsigned(factor_b), 
             std_logic_vector(result) => multiplication_result, 
             clk                      => clk, 
-            reset_n                  => clear_multiplication_n, 
+            clear_n                  => clear_multiplication_n, 
+            reset_n                  => reset_n,
             modulus                  => unsigned(modulus), 
             valid_out                => multiplication_done
         );
