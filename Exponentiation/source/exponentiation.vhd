@@ -21,22 +21,22 @@ entity exponentiation is
 	);
 	port (
 		clk 		    : in  std_logic;
-		reset_n 	    : in  std_logic := '1';
+		reset_n 	    : in  std_logic;
 		------------------------------------------------------------------------------
         -- Controls messages into core
         ------------------------------------------------------------------------------
 		valid_in	    : in  std_logic;
-		ready_in	    : out std_logic := '1';
+		ready_in	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls results out of core
         ------------------------------------------------------------------------------
 		ready_out	    : in  std_logic;
-		valid_out	    : out std_logic := '0';
+		valid_out	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls what happens if there is nothing more to calculate
         ------------------------------------------------------------------------------
 		last_message_in : in std_logic;
-		last_result_out : out std_logic := '0';
+		last_result_out : out std_logic;
 		------------------------------------------------------------------------------
         -- Data input that is used for calculations
         ------------------------------------------------------------------------------
