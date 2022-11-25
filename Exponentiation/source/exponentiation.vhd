@@ -35,8 +35,8 @@ entity exponentiation is
         ------------------------------------------------------------------------------
         -- Controls what happens if there is nothing more to calculate
         ------------------------------------------------------------------------------
-		last_message_in : in  std_logic;
-		last_result_out : out std_logic;
+		-- last_message_in : in  std_logic;
+		-- last_result_out : out std_logic;
 		------------------------------------------------------------------------------
         -- Data input that is used for calculations
         ------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ architecture rtl of exponentiation is
     -- Used to control the flow of messages in and results out of the core
     ----------------------------------------------------------------------------------
     signal result_sent_out            : std_logic := '0';
-    signal second_to_last_result_out  : std_logic := '0';
+    -- signal second_to_last_result_out  : std_logic := '0';
 
     ----------------------------------------------------------------------------------
     -- Mappings of ports to make readable and writable
@@ -106,7 +106,8 @@ architecture rtl of exponentiation is
     signal status_16                  : std_logic_vector(7 downto 0) := (others => '0');
     signal status_32                  : std_logic_vector(15 downto 0) := (others => '0');
 begin
-    status_8 <= last_message_in & ready_out & valid_in & reset_n & result_sent_out & last_multiplication & exponentiation_done & multiplication_done; 
+    -- status_8 <= last_message_in & ready_out & valid_in & reset_n & result_sent_out & last_multiplication & exponentiation_done & multiplication_done; 
+    status_8 <= '0' & ready_out & valid_in & reset_n & result_sent_out & last_multiplication & exponentiation_done & multiplication_done;
     status <= status_32 & status_16 & status_8;
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
@@ -190,19 +191,19 @@ begin
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(clk, reset_n, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
+    check_if_exponentiation_done : process(clk, reset_n, result_sent_out, last_multiplication, counter_zero, counter) is
     begin
         if result_sent_out = '1' or reset_n = '0' then
             exponentiation_done <= '0';
-            last_result_out     <= '0';
+            -- last_result_out     <= '0';
         elsif rising_edge(clk) then
             if last_multiplication = '1' and counter_zero = '1' then
                 exponentiation_done <= '1';
-                last_result_out     <= second_to_last_result_out;
+                -- last_result_out     <= second_to_last_result_out;
                 counter_zero        <= '0';
             elsif counter = 0 then
                 exponentiation_done <= '0';
-                last_result_out     <= '0';
+                -- last_result_out     <= '0';
                 counter_zero        <= '1';
             end if;
         end if; 
@@ -302,14 +303,14 @@ begin
     ----------------------------------------------------------------------------------
     -- Sets second to last out signal so that it is ready to set the last out signal
     ----------------------------------------------------------------------------------
-    set_second_to_last_result_out : process(clk, reset_n, valid_in, message_state, last_message_in) is
-    begin
-        if reset_n = '0' then
-            second_to_last_result_out <= '0';
-        elsif rising_edge(clk)  then
-            if message_state = LOAD_MESSAGE and valid_in = '1' then
-                second_to_last_result_out <= last_message_in;
-            end if;
-        end if;
-    end process;
+--     set_second_to_last_result_out : process(clk, reset_n, valid_in, message_state, last_message_in) is
+--     begin
+--         if reset_n = '0' then
+--             second_to_last_result_out <= '0';
+--         elsif rising_edge(clk)  then
+--             if message_state = LOAD_MESSAGE and valid_in = '1' then
+--                 second_to_last_result_out <= last_message_in;
+--             end if;
+--         end if;
+--     end process;
 end architecture;
