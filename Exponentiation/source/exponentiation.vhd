@@ -21,22 +21,22 @@ entity exponentiation is
 	);
 	port (
 		clk 		    : in  std_logic;
-		reset_n 	    : in  std_logic := '1';
+		reset_n 	    : in  std_logic;
 		------------------------------------------------------------------------------
         -- Controls messages into core
         ------------------------------------------------------------------------------
 		valid_in	    : in  std_logic;
-		ready_in	    : out std_logic := '1';
+		ready_in	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls results out of core
         ------------------------------------------------------------------------------
 		ready_out	    : in  std_logic;
-		valid_out	    : out std_logic := '0';
+		valid_out	    : out std_logic;
         ------------------------------------------------------------------------------
         -- Controls what happens if there is nothing more to calculate
         ------------------------------------------------------------------------------
-		last_message_in : in std_logic;
-		last_result_out : out std_logic := '0';
+		last_message_in : in  std_logic;
+		last_result_out : out std_logic;
 		------------------------------------------------------------------------------
         -- Data input that is used for calculations
         ------------------------------------------------------------------------------
@@ -57,9 +57,9 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     -- Signals related to message state machine
     ----------------------------------------------------------------------------------
-    type   message_state_type is (LOAD_MESSAGE, IDLE, RESULT_READY);
-    signal message_state              : message_state_type := LOAD_MESSAGE;
-    signal next_message_state         : message_state_type := LOAD_MESSAGE;
+    type   message_state_type is (UNINITIALIZED, LOAD_MESSAGE, IDLE, RESULT_READY);
+    signal message_state              : message_state_type := UNINITIALIZED;
+    signal next_message_state         : message_state_type := UNINITIALIZED;
 
     ----------------------------------------------------------------------------------
     -- Inputs and outputs of the modular multiplication core
@@ -217,7 +217,7 @@ begin
     change_message_state : process(clk, reset_n, next_message_state) is
     begin
         if reset_n = '0' then
-            message_state <= LOAD_MESSAGE;
+            message_state <= UNINITIALIZED;
         elsif rising_edge(clk) then
             message_state <= next_message_state;
         end if;
@@ -235,12 +235,23 @@ begin
     begin
         ready_in <= '0';
         case message_state is
-            when LOAD_MESSAGE =>
-                ready_in <= '1';
+            when UNINITIALIZED =>
+                ready_in <= '0';
                 if valid_in = '1' then
+                    next_message_state <= UNINITIALIZED;
+                    status_16 <= (6 => '1', others => '0');
+                else
+                    next_message_state <= UNINITIALIZED;
+                    status_16 <= (7 => '1', others => '0');
+                end if;
+                next_message_state <= LOAD_MESSAGE;
+            when LOAD_MESSAGE =>
+                if valid_in = '1' then
+                    ready_in <= '1';
                     status_16 <= (0 => '1', others => '0');
                     next_message_state <= IDLE;
                 else
+                    ready_in <= '0';
                     status_16 <= (1 => '1', others => '0');
                     next_message_state <= LOAD_MESSAGE;
                 end if;
