@@ -154,12 +154,13 @@ begin
     -- 2. Double multiplication: Used when the counter is at the position where a double
     --    multiplication is needed
     ----------------------------------------------------------------------------------
-    control_multiplication_flow : process(clk, multiplication_result, double_multiplication, double_multiplication_done, counter) is
+    control_multiplication_flow : process(clk, reset_n, multiplication_result, double_multiplication, double_multiplication_done, counter) is
     begin
         if reset_n = '0' then
             clear_multiplication_n     <= '0';
             double_multiplication_done <= '0';
             internal_result            <= (others => '0');
+            counter                    <= (others => '1');
         elsif rising_edge(clk) then
             clear_multiplication_n <= '1';
             if multiplication_done = '1' then
@@ -167,6 +168,7 @@ begin
                 internal_result <= multiplication_result;
                 if double_multiplication = '1' and double_multiplication_done = '0' then
                     status_32 <= (0 => '1', others => '0');
+                    counter <= counter;
                     double_multiplication_done <= '1';
                 else
                     status_32 <= (1 => '1', others => '0');
@@ -199,11 +201,14 @@ begin
                 last_result_out     <= second_to_last_result_out;
                 counter_zero        <= '0';
             elsif counter = 0 then
+                exponentiation_done <= '0';
+                last_result_out     <= '0';
                 counter_zero        <= '1';
             end if;
         end if; 
     end process;
 
+    --result_sent_out <= '1' when exponentiation_done = '1' and internal_valid_out = '1' else '0';
     ----------------------------------------------------------------------------------
     -- Used to reset exponentiation done flag by indicating that the result has been sent
     ----------------------------------------------------------------------------------
@@ -297,7 +302,7 @@ begin
     ----------------------------------------------------------------------------------
     -- Sets second to last out signal so that it is ready to set the last out signal
     ----------------------------------------------------------------------------------
-    set_second_to_last_result_out : process(clk, valid_in, message_state, last_message_in) is
+    set_second_to_last_result_out : process(clk, reset_n, valid_in, message_state, last_message_in) is
     begin
         if reset_n = '0' then
             second_to_last_result_out <= '0';
