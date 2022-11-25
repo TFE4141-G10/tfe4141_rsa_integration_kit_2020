@@ -57,7 +57,7 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     -- Signals related to message state machine
     ----------------------------------------------------------------------------------
-    type   message_state_type is (UNINITIALIZED, LOAD_MESSAGE, IDLE, RESULT_READY);
+    type   message_state_type is (UNINITIALIZED, LOAD_MESSAGE, RESULT_READY, IDLE);
     signal message_state              : message_state_type := UNINITIALIZED;
     signal next_message_state         : message_state_type := UNINITIALIZED;
 
@@ -93,7 +93,7 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     -- Mappings of ports to make readable and writable
     ----------------------------------------------------------------------------------
-    signal internal_message           : std_logic_vector(255 downto 0);
+    signal internal_message           : std_logic_vector(255 downto 0) := (others => '0');
     signal internal_valid_out         : std_logic := '0';
 
     ----------------------------------------------------------------------------------
@@ -154,7 +154,11 @@ begin
     ----------------------------------------------------------------------------------
     control_multiplication_flow : process(clk, multiplication_result, double_multiplication, double_multiplication_done, counter) is
     begin
-        if rising_edge(clk) then
+        if reset_n = '0' then
+            clear_multiplication_n     <= '0';
+            double_multiplication_done <= '0';
+            internal_result            <= (others => '0');
+        elsif rising_edge(clk) then
             clear_multiplication_n <= '1';
             if multiplication_done = '1' then
                 clear_multiplication_n <= '0';
@@ -182,9 +186,9 @@ begin
     ----------------------------------------------------------------------------------
     -- Checks if the last multiplication is done, and if so, sets the exponentiation_done
     ----------------------------------------------------------------------------------
-    check_if_exponentiation_done : process(clk, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
+    check_if_exponentiation_done : process(clk, reset_n, result_sent_out, last_multiplication, counter_zero, second_to_last_result_out, counter) is
     begin
-        if result_sent_out = '1' then
+        if result_sent_out = '1' or reset_n = '0' then
             exponentiation_done <= '0';
             last_result_out     <= '0';
         elsif rising_edge(clk) then
@@ -244,7 +248,6 @@ begin
                     next_message_state <= UNINITIALIZED;
                     status_16 <= (7 => '1', others => '0');
                 end if;
-                next_message_state <= LOAD_MESSAGE;
             when LOAD_MESSAGE =>
                 if valid_in = '1' then
                     ready_in <= '1';
@@ -278,9 +281,11 @@ begin
     -- Overwrites internal message register with new message when the core is ready 
     -- to accept a new message
     ----------------------------------------------------------------------------------
-    acquire_new_message : process(clk, valid_in, message_state, message) is
+    acquire_new_message : process(clk, reset_n, valid_in, message_state, message) is
     begin
-        if rising_edge(clk) then
+        if reset_n = '0' then
+            internal_message <= (others => '0');
+        elsif rising_edge(clk) then
             if message_state = LOAD_MESSAGE and valid_in = '1' then
                 internal_message <= message;
             end if;
@@ -292,7 +297,9 @@ begin
     ----------------------------------------------------------------------------------
     set_second_to_last_result_out : process(clk, valid_in, message_state, last_message_in) is
     begin
-        if rising_edge(clk)  then
+        if reset_n = '0' then
+            second_to_last_result_out <= '0';
+        elsif rising_edge(clk)  then
             if message_state = LOAD_MESSAGE and valid_in = '1' then
                 second_to_last_result_out <= last_message_in;
             end if;
