@@ -101,7 +101,12 @@ architecture rtl of exponentiation is
     ----------------------------------------------------------------------------------
     signal counter                    : unsigned(7 downto 0) := (others => '1'); 
     signal counter_zero               : std_logic := '0';
+
+
+    signal status_16                  : std_logic_vector(15 downto 0) := (others => '0');
+    signal status_32                  : std_logic_vector(15 downto 0) := (others => '0');
 begin
+    status <= status_32 & status_16;
     ----------------------------------------------------------------------------------
     -- A single multiplication core is used for both multiplication operations in the
     -- Blakley algorithm
@@ -155,8 +160,10 @@ begin
                 clear_multiplication_n <= '0';
                 internal_result <= multiplication_result;
                 if double_multiplication = '1' and double_multiplication_done = '0' then
+                    status_32 <= (0 => '1', others => '0');
                     double_multiplication_done <= '1';
                 else
+                    status_32 <= (1 => '1', others => '0');
                     counter <= counter - 1;
                     double_multiplication_done <= '0';
                 end if;
@@ -230,24 +237,27 @@ begin
         case message_state is
             when LOAD_MESSAGE =>
                 ready_in <= '1';
-                status <= (1 => '1', others => '0');
                 if valid_in = '1' then
+                    status_16 <= (0 => '1', others => '0');
                     next_message_state <= IDLE;
                 else
+                    status_16 <= (1 => '1', others => '0');
                     next_message_state <= LOAD_MESSAGE;
                 end if;
             when RESULT_READY =>
-                status <= (3 => '1', others => '0');
                 if ready_out = '1' then
+                    status_16 <= (2 => '1', others => '0');
                     next_message_state <= LOAD_MESSAGE;
                 else
+                    status_16 <= (3 => '1', others => '0');
                     next_message_state <= RESULT_READY;
                 end if;
             when others => -- IDLE
-                status <= (2 => '1', others => '0');
                 if internal_valid_out = '1' then
+                    status_16 <= (4 => '1', others => '0');
                     next_message_state <= RESULT_READY;
                 else
+                    status_16 <= (5 => '1', others => '0');
                     next_message_state <= IDLE;
                 end if;
         end case;
