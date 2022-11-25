@@ -25,7 +25,7 @@ entity modulo is
 end entity;
 
 architecture rtl of modulo is
-    signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0); -- need to match signal lengths
+    signal internal_result : unsigned(C_BLOCK_SIZE + 1 downto 0) := (others => '0'); -- need to match signal lengths
 begin
     result          <= internal_result(C_BLOCK_SIZE - 1 downto 0);
     internal_result <= numerator - ('0' & modulus & '0')  when numerator >= ('0' & modulus & '0') else

@@ -208,19 +208,19 @@ begin
         end if; 
     end process;
 
-    result_sent_out <= '1' when ready_out = '1' and internal_valid_out = '1' else '0';
+    -- result_sent_out <= '1' when ready_out = '1' and internal_valid_out = '1' else '0';
     ----------------------------------------------------------------------------------
     -- Used to reset exponentiation done flag by indicating that the result has been sent
     ----------------------------------------------------------------------------------
-    -- detect_if_result_sent : process(clk, internal_valid_out, ready_out) is
-    -- begin
-    --     result_sent_out <= '0';
-    --     if rising_edge(clk) then
-    --         if ready_out = '1' and internal_valid_out = '1' then
-    --             result_sent_out <= '1';
-    --         end if;
-    --     end if;
-    -- end process;
+    detect_if_result_sent : process(clk, internal_valid_out, ready_out) is
+    begin
+        result_sent_out <= '0';
+        if rising_edge(clk) then
+            if ready_out = '1' and internal_valid_out = '1' then
+                result_sent_out <= '1';
+            end if;
+        end if;
+    end process;
 
     ----------------------------------------------------------------------------------
     -- Changes message state every clock cycle
